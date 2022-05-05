@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="400.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Zamknij połączenia" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="btQuit" mnemonicParsing="false" onAction="#onQuit" text="Koniec" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Opcje">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Undo" />
+            <MenuItem mnemonicParsing="false" text="Redo" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Cut" />
+            <MenuItem mnemonicParsing="false" text="Copy" />
+            <MenuItem mnemonicParsing="false" text="Paste" />
+            <MenuItem mnemonicParsing="false" text="Delete" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Select All" />
+            <MenuItem mnemonicParsing="false" text="Unselect All" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem mnemonicParsing="false" text="About RemoteAdmin" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+      <TabPane prefHeight="375.0" prefWidth="640.0" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab onSelectionChanged="#onSelectedAction" text="Akcja">
+               <content>
+                  <Pane prefHeight="495.0" prefWidth="627.0" style="-fx-background-color: transparent;">
+                     <children>
+                        <Group>
+                           <effect>
+                              <DropShadow />
+                           </effect>
+                           <children>
+                              <ScrollPane prefHeight="343.0" prefWidth="636.0">
+                                 <content>
+                                    <TableView fx:id="table" prefHeight="340.0" prefWidth="634.0" style="-fx-background-color: transparent;">
+                                      <columns>
+                                          <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
+                                        <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
+                                        <TableColumn fx:id="statusCol" minWidth="50.0" prefWidth="100.0" text="Status" />
+                                      </columns>
+                                    </TableView>
+                                 </content>
+                              </ScrollPane>
+                           </children>
+                        </Group>
+                     </children>
+                  </Pane>
+               </content>
+               <tooltip>
+                  <Tooltip text="Panel w którym mamy dostep do maszyn" />
+               </tooltip>
+          </Tab>
+          <Tab disable="false" text="Ustawienia">
+               <content>
+                  <VBox prefHeight="193.0" prefWidth="306.0" spacing="10.0" style="-fx-alignment: TOP_CENTER;">
+                     <opaqueInsets>
+                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                     </opaqueInsets>
+                     <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                     <children>
+                        <CheckBox mnemonicParsing="false" text="CheckBox" />
+                        <Label lineSpacing="10.0" prefHeight="17.0" prefWidth="135.0" style="-fx-alignment: CENTER;" text="Label" textAlignment="CENTER" />
+                        <Button lineSpacing="11.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="134.0" text="Button" />
+                     </children>
+                  </VBox>
+               </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+    <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS" />
+  </children>
+</VBox>

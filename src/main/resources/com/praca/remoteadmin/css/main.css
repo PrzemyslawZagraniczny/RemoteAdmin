@@ -2,7 +2,8 @@ root {
     display: block;
 }
 .root {
-    -fx-background-image: url(../img/background.jpg);
+    -fx-background-image: url(../img/tlo.png);
+    -fx-background-repeat: repeat;
 }
 .label {
     -fx-font-size: 12px;

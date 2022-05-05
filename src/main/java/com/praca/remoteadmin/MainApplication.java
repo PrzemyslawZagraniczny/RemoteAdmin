@@ -10,8 +10,8 @@ import java.io.IOException;
 public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("main.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 640, 480);
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("View/main1.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 1024, 768);
         scene.getStylesheets().add
                 (MainApplication.class.getResource("css/main.css").toExternalForm());
         stage.setTitle("RemoteAdmin");
