@@ -1,5 +1,6 @@
 package com.praca.remoteadmin.Connection;
 
+import javafx.application.Platform;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
 
@@ -21,17 +22,11 @@ public class ConsoleCaptureOutput extends OutputStream {
 
 
     public void writeAll(String str) {
-        if (EventQueue.isDispatchThread()) {
-            txt.setFocusTraversable(true);
-        } else {
-
-            EventQueue.invokeLater(() -> {
-                txt.appendText(str);
-                txt.requestFocus();
-                txt.end();
-            });
-
-        }
+        Platform.runLater(() -> {
+            txt.appendText(str);
+            txt.requestFocus();
+            txt.end();
+        });
     }
 
         @Override

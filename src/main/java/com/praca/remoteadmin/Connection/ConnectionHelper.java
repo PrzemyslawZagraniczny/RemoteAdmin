@@ -42,9 +42,12 @@ public class ConnectionHelper {
                 return data;
             }
             int i = 1;
-            for (String address: list
-                 ) {
+            for (String address: list) {
                 //TODO: w przyszłości plik utworzyć jako csv i zapisać więcej wartości (np. nazwe stacji albo sali)
+                address = address.trim();
+                if(address.length() < 1) continue;
+                //ignoruj linie zaczynające się od znaku #
+                if(address.startsWith("#")) continue;
                 data.add(new Computer("Komputer " + i, address, StatusType.UNKNOWN));
                 i++;
             }

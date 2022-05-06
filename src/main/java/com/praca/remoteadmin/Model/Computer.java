@@ -1,9 +1,13 @@
 package com.praca.remoteadmin.Model;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.Alert;
+
+import java.awt.*;
 
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
@@ -38,6 +42,21 @@ public class Computer {
 
     public void setCmdExitStatus(int cmdExitStatus) {
         this.cmdExitStatus.set(cmdExitStatus);
+
+        if (EventQueue.isDispatchThread()) {
+        } else {
+
+            if(cmdExitStatus != 0) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Uwaga!");
+                    alert.setHeaderText(getAddress());
+                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<" + cmdExitStatus + ">>");
+                    alert.show();
+                });
+            }
+
+        }
     }
 
     public Computer() {
@@ -84,6 +103,7 @@ public class Computer {
 
     public void setSelected(boolean selected) {
         this.selected.set(selected);
+        System.out.println(selected);
     }
 
     public String getStat() {

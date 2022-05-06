@@ -1,16 +1,15 @@
 package com.praca.remoteadmin.Connection;
 
 import com.jcraft.jsch.*;
-import com.praca.remoteadmin.JschConsole;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
+import javafx.scene.control.Alert;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 public class SSH2Connector implements IGenericConnector{
     JSch jsch=new JSch();
@@ -43,7 +42,7 @@ public class SSH2Connector implements IGenericConnector{
             System.err.println(e.getMessage());
         }
 
-        UserInfo ui=new SSH2Connector.MyUserInfo();
+        UserInfo ui=new SSHUserInfo();
         session.setUserInfo(ui);
         session.connect();
 
@@ -137,7 +136,7 @@ public class SSH2Connector implements IGenericConnector{
         }
     }
 
-    public class MyUserInfo implements UserInfo, UIKeyboardInteractive {
+    public class SSHUserInfo implements UserInfo, UIKeyboardInteractive {
         public String getPassword(){ return passwd; }
         public boolean promptYesNo(String str){
             Object[] options={ "Tak", "Nie" };
@@ -214,6 +213,11 @@ public class SSH2Connector implements IGenericConnector{
                 panel.add(texts[i], gbc);
                 gbc.gridy++;
             }
+//            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//            alert.setTitle("Uwaga!");
+//            alert.setHeaderText(destination+": "+name);
+//            //alert.setContentText("Maszyna wróciła status wykonania polecenia <<"+future.get().getCmdExitStatus()+">>");
+//            alert.show();
 
             if(JOptionPane.showConfirmDialog(null, panel,
                     destination+": "+name,
