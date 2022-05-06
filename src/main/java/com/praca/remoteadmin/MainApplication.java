@@ -12,6 +12,9 @@ public class MainApplication extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("View/main1.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 1024, 768);
+        stage.setMinWidth(640);
+        stage.setMinHeight(610);
+        stage.setMaxHeight(768);
         scene.getStylesheets().add
                 (MainApplication.class.getResource("css/main.css").toExternalForm());
         stage.setTitle("RemoteAdmin");

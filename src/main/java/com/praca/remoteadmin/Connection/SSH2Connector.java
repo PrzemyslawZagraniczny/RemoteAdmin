@@ -1,83 +1,149 @@
-package com.praca.remoteadmin;
+package com.praca.remoteadmin.Connection;
+
 import com.jcraft.jsch.*;
-import java.awt.*;
+import com.praca.remoteadmin.JschConsole;
+import com.praca.remoteadmin.Model.Computer;
+import com.praca.remoteadmin.Model.StatusType;
+
 import javax.swing.*;
-import java.io.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
-public class JschConsole {
-    public static void main(String[] arg) {
-        try{
-            JSch jsch=new JSch();
+public class SSH2Connector implements IGenericConnector{
+    JSch jsch=new JSch();
+    private Session session = null;
 
-            String host=null;
-            if(arg.length>0){
-                host=arg[0];
+    private String sLogin = null;
+    private String sPassword = null;
+
+    private int iPort = 22;
+    private Computer computer = null;
+    private Channel channel = null;
+
+    private ConsoleCaptureOutput out = null;
+    private OutputStream err = null;
+
+
+    @Override
+    public boolean openConnection(String sLogin, String sPassword, Computer comp) throws JSchException {
+
+
+        this.sLogin = sLogin;
+        this.sPassword = sPassword;
+        this.computer = comp;
+
+        try {
+            session = jsch.getSession(sLogin, comp.getAddress(), iPort);
+        }catch (NullPointerException e) {
+            //TODO:
+            //jakiś bardziej czytelny komunikat może
+            System.err.println(e.getMessage());
+        }
+
+        UserInfo ui=new SSH2Connector.MyUserInfo();
+        session.setUserInfo(ui);
+        session.connect();
+
+
+        try {
+            if( !session.isConnected()) {
+                //TODO: zdefiniuj własny wyjątek
+                computer.setStat(StatusType.OFFLINE);
+                throw new ExceptionInInitializerError("Połączenie nie zostało ustanowione!");
             }
-            else{
-                host="przemek@192.168.42.141";
-            }
-            String user=host.substring(0, host.indexOf('@'));
-            host=host.substring(host.indexOf('@')+1);
+            computer.setStat(StatusType.ACTIVE);
 
-            Session session=jsch.getSession(user, host, 22);
 
-            // username and password will be given via UserInfo interface.
-            UserInfo ui=new MyUserInfo();
-            session.setUserInfo(ui);
-            session.connect();
+        }catch (NullPointerException e) {
+            //TODO: jakiś bardziej czytelny komunikat może
+            System.err.println("Najpier trzeba wywołać metodę <<openConnection>>");
+            System.err.println(e.getMessage());
+            return channel.isConnected();
+        }
 
-            String command=JOptionPane.showInputDialog("Enter command",
-                    "set|grep SSH");
+        return false;
+    }
 
-            Channel channel=session.openChannel("exec");
-            ((ChannelExec)channel).setCommand(command);
+    @Override
+    public void setErrorStream(OutputStream err) {
+        this.err = err;
+    }
 
-            // X Forwarding
-            // channel.setXForwarding(true);
+    @Override
+    public void setOutputStream(ConsoleCaptureOutput out) {
+        this.out = out;
+    }
 
-            //channel.setInputStream(System.in);
+    @Override
+    public void execCommand(String cmd) {
+        new Thread(() -> exec(cmd)).start();
+    }
+
+    private void exec(String cmd) {
+        try {
+            channel=session.openChannel("exec");
+            ((ChannelExec)channel).setCommand(cmd);
             channel.setInputStream(null);
-
-            //channel.setOutputStream(System.out);
-
-            //FileOutputStream fos=new FileOutputStream("/tmp/stderr");
-            //((ChannelExec)channel).setErrStream(fos);
-            ((ChannelExec)channel).setErrStream(System.err);
-
+            ((ChannelExec)channel).setErrStream(err);
+//            ((ChannelExec)channel).setOutputStream(out);
             InputStream in=channel.getInputStream();
+            this.out.writeAll(">"+cmd+System.lineSeparator());
 
             channel.connect();
-
             byte[] tmp=new byte[1024];
             while(true){
                 while(in.available()>0){
                     int i=in.read(tmp, 0, 1024);
                     if(i<0)break;
-                    System.out.print(new String(tmp, 0, i));
+                    this.out.writeAll(new String(tmp));
                 }
                 if(channel.isClosed()){
                     if(in.available()>0) continue;
+                    //dodaj znak nowej lini na koniec
+                    this.out.writeAll(new String(System.lineSeparator()));
+                    //wpisujemy do tabelki wyjściowy exit status dla polecenia
+                    computer.setCmdExitStatus(channel.getExitStatus());
                     System.out.println("exit-status: "+channel.getExitStatus());
                     break;
                 }
-                try{Thread.sleep(1000);}catch(Exception ee){
+                try{Thread.sleep(100);}catch(Exception ee){
                     ee.printStackTrace();
                 }
             }
+        }catch (NullPointerException e) {
+            //TODO: jakiś bardziej czytelny komunikat może
+            System.err.println("Najpierw trzeba wywołać metodę <<openConnection>>");
+            System.err.println(e.getMessage());
+        } catch (JSchException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }finally {
             channel.disconnect();
-            session.disconnect();
-        }
-        catch(Exception e){
-            System.out.println(e);
         }
     }
-    public static class MyUserInfo implements UserInfo, UIKeyboardInteractive {
+
+    @Override
+    public void disconnect() {
+        try {
+            session.disconnect();
+            session = null;
+            channel = null;
+        }catch (NullPointerException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public class MyUserInfo implements UserInfo, UIKeyboardInteractive {
         public String getPassword(){ return passwd; }
         public boolean promptYesNo(String str){
-            Object[] options={ "yes", "no" };
+            Object[] options={ "Tak", "Nie" };
             int foo= JOptionPane.showOptionDialog(null,
                     str,
-                    "Warning",
+                    "Uwaga",
                     JOptionPane.DEFAULT_OPTION,
                     JOptionPane.WARNING_MESSAGE,
                     null, options, options[0]);
@@ -90,7 +156,7 @@ public class JschConsole {
         public String getPassphrase(){ return null; }
         public boolean promptPassphrase(String message){ return true; }
         public boolean promptPassword(String message){
-            passwd = "przemek123";
+            passwd = sPassword;
             return true;
 //            Object[] ob={passwordField};
 //            int result=
@@ -165,5 +231,4 @@ public class JschConsole {
             }
         }
     }
-
 }

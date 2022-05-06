@@ -11,6 +11,7 @@ module com.praca.remoteadmin {
     requires com.almasb.fxgl.all;
     requires java.desktop;
     requires jsch;
+    requires org.junit.jupiter.api;
 
     opens com.praca.remoteadmin to javafx.fxml;
     exports com.praca.remoteadmin;

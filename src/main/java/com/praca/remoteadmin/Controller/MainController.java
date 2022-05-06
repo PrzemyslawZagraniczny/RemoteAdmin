@@ -1,5 +1,10 @@
 package com.praca.remoteadmin.Controller;
 
+import com.jcraft.jsch.JSchException;
+import com.praca.remoteadmin.Connection.ConnectionHelper;
+import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
+import com.praca.remoteadmin.Connection.IGenericConnector;
+import com.praca.remoteadmin.Connection.SSH2Connector;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
 import com.praca.remoteadmin.Model.WorkStation;
@@ -10,9 +15,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class MainController {
@@ -27,7 +30,14 @@ public class MainController {
     public TableColumn<Computer,Boolean> selectCol;
     @FXML
     public TableView<Computer> table;
-
+    @FXML
+    public PasswordField passwordField;
+    @FXML
+    public TextField loginField;
+    public TextArea consoleOutput;
+    public TextField cmdLine;
+    public TableColumn cmdStatCol;
+    private IGenericConnector conn = null;
 
 
     public void onQuit(ActionEvent actionEvent) {
@@ -38,9 +48,14 @@ public class MainController {
     }
     @FXML
     public void initialize() {
-        System.out.println("WCHODZI!!!!!");
+        consoleOutput.autosize();
+        cmdLine.setText("set|grep SSH");
+        loginField.setText("przemek");
+        passwordField.setText("przemek123");
+
+
         statusCol.setCellValueFactory(
-                new PropertyValueFactory<>("stat")
+                new PropertyValueFactory<>("status")
         );
         addressCol.setCellValueFactory(
                 new PropertyValueFactory<>("address")
@@ -48,15 +63,55 @@ public class MainController {
         selectCol.setCellValueFactory(
                 new PropertyValueFactory<>("selected")
         );
-        final ObservableList<Computer> data = FXCollections.observableArrayList(
-                new Computer("Jacob", "198.164.42.141", StatusType.ACTIVE),
-                new Computer("Isabella", "198.164.42.144", StatusType.ACTIVE),
-                new Computer("Ethan", "198.164.42.145", StatusType.OFFLINE),
-                new Computer("Emma", "198.164.42.146", StatusType.ACTIVE),
-                new Computer("Michael", "198.164.42.147", StatusType.OFFLINE)
+        cmdStatCol.setCellValueFactory(
+                new PropertyValueFactory<>("cmdExitStatus")
         );
 
 
-        table.getItems().addAll(data);
+        table.getItems().addAll(ConnectionHelper.getComputers());
+    }
+    @FXML
+    public void OnLogingIn(ActionEvent actionEvent) {
+        String sLogin = loginField.getText().trim();
+        String sPassword = passwordField.getText().trim();
+        //TODO:
+        //szyfruj hasło i login zaraz po przejęciu od użytkownika oraz zeruj ich wartości w polach
+    }
+
+    public void onExecuteCommand(ActionEvent actionEvent) {
+
+        //TODO: Pilnie zmień kod. Połaczenie musi być wykonywane osobno
+
+//        data.get(1).setStat(StatusType.ACTIVE);
+//        if( true) return;
+
+        Computer comp = ConnectionHelper.getComputers().get(0);
+        if(conn == null) {
+            conn = new SSH2Connector();
+
+
+            try {
+                conn.openConnection(loginField.getText(), passwordField.getText(), comp);
+                conn.setErrorStream(System.err);
+                conn.setOutputStream(new ConsoleCaptureOutput(consoleOutput));
+                //conn.setOutputStream(System.out);
+            } catch (JSchException e) {
+                System.err.println(e.getMessage());
+                throw new RuntimeException(e);
+            }
+        }
+        try {
+
+            String cmd = cmdLine.getText().trim();
+            conn.execCommand(cmd);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void onConsolClear(ActionEvent actionEvent) {
+        consoleOutput.clear();
     }
 }
