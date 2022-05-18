@@ -44,6 +44,7 @@ public class SSH2Connector implements IGenericConnector{
 
         UserInfo ui=new SSHUserInfo();
         session.setUserInfo(ui);
+        session.setTimeout(ConnectionHelper.shhConnectionTimeOut);
         session.connect();
 
 
@@ -131,6 +132,7 @@ public class SSH2Connector implements IGenericConnector{
             session.disconnect();
             session = null;
             channel = null;
+            computer.setStat(StatusType.OFFLINE);
         }catch (NullPointerException e) {
             System.err.println(e.getMessage());
         }

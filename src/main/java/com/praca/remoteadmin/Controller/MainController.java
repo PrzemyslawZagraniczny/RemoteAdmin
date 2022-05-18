@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSchException;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
 import com.praca.remoteadmin.Connection.SSH2Connector;
+import com.praca.remoteadmin.Model.CmdType;
 import com.praca.remoteadmin.Model.Computer;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -51,9 +52,9 @@ public class MainController {
     @FXML
     public void initialize() {
         consoleOutput.autosize();
-        cmdLine.setText("set|grep SSH");
-        loginField.setText("przemek");
-        passwordField.setText("przemek123");
+        cmdLine.setText(ConnectionHelper.defaultCommand);
+        loginField.setText(ConnectionHelper.defaultLogin);
+        passwordField.setText(ConnectionHelper.defaultPassword);
 
 
         statusCol.setCellValueFactory(
@@ -95,7 +96,18 @@ public class MainController {
 
 //        data.get(1).setStat(StatusType.ACTIVE);
 //        if( true) return;
+        execParallel(CmdType.SENDING_CMD);
+    }
 
+    private void execParallel(CmdType cmdType) {
+        new Thread(() -> exec(cmdType)).start();
+    }
+
+
+    private void exec(CmdType cmdType) {
+        for (CommandCallable comp:sshSessions) {
+            comp.setCmdType(cmdType);
+        }
         ExecutorService executorService = Executors.newFixedThreadPool(sshSessions.size());
         List<Future<Computer>> futures = null;
         try {
@@ -122,10 +134,22 @@ public class MainController {
 //            }
 //        }
 
+        switch (cmdType) {
+            case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
+                sshSessions.clear();
+                btConnect.setDisable(!true);
+                break;
+            case CONNECTING:
+                btConnect.setDisable(!true);
+                break;
+            case NONE:
+            default:
+                break;
+        }
+
+        System.out.println("KONIEC!!!!");
 
         executorService.shutdown();
-        Computer comp = ConnectionHelper.getComputers().get(0);
-
     }
 
     public void onConsolClear(ActionEvent actionEvent) {
@@ -133,19 +157,22 @@ public class MainController {
     }
 
     public void onConect(ActionEvent actionEvent) {
-        if(sshSessions.size() > 0) {
+
+        btConnect.setDisable(true);
+        if(sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
+
             btConnect.setText("Połącz");
+
             //najpier pozamykacj wszystkie połączenia
-            for (CommandCallable rp: sshSessions) {
-                rp.disconnect();
-            }
-            sshSessions.clear();
+            execParallel(CmdType.DISCONNECTING);
+
             return;
         }
         btConnect.setText("Rozłącz");
         for (Computer comp: ConnectionHelper.getComputers()) {
             sshSessions.add(new CommandCallable(comp, loginField.getText(), passwordField.getText()));
         }
+        execParallel(CmdType.CONNECTING);
 
     }
 
@@ -158,16 +185,25 @@ public class MainController {
         private String login;
         private SSH2Connector conn = null;
 
+        private CmdType cmdType = CmdType.NONE;
+
+        public CmdType getCmdType() {
+            return cmdType;
+        }
+
+        public void setCmdType(CmdType cmdType) {
+            this.cmdType = cmdType;
+        }
+
         public CommandCallable(Computer comp, String login, String pass) {
             this.comp = comp;
             this.pass = pass;
             this.login = login;
-            init();
         }
 
 
 
-        private void init() {
+        private void connect() {
             if(conn == null) {
                 conn = new SSH2Connector();
 
@@ -185,8 +221,30 @@ public class MainController {
 
         @Override
         public com.praca.remoteadmin.Model.Computer call() throws Exception {
+            switch (cmdType) {
+                case CONNECTING:
+                    connect();
+                    break;
+                case SENDING_CMD:
+                    sndCommand();
+                    break;
+                case DISCONNECTING:
+                    disconnect();
+                    break;
+                case NONE:
+                default:
+
+            }
+
+
+            return comp;
+        }
+
+
+        //wysyłanie komendy
+        private boolean sndCommand() {
             if(!comp.isSelected())
-                return comp;
+                return true;
 
             try {
 
@@ -196,8 +254,7 @@ public class MainController {
                 System.err.println(e.getMessage());
                 throw new RuntimeException(e);
             }
-
-            return comp;
+            return false;
         }
 
         public void disconnect() {

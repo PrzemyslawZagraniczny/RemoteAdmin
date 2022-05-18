@@ -19,4 +19,6 @@ module com.praca.remoteadmin {
     exports com.praca.remoteadmin.Model;
     opens com.praca.remoteadmin.Controller to javafx.fxml;
     opens com.praca.remoteadmin.Model to javafx.fxml;
+    exports com.praca.remoteadmin.Brudnopis;
+    opens com.praca.remoteadmin.Brudnopis to javafx.fxml;
 }

@@ -12,13 +12,20 @@ import java.nio.file.Path;
 import java.util.List;
 
 /*
-Klasa pomocnicz słóżąca do:
+Klasa pomocnicz służąca do:
  -pobierania danych o serwerach z pliku workstation.txt
  */
 public class ConnectionHelper {
+
+    public static int shhConnectionTimeOut = 10000;    //10 sekund
+    public static String defaultCommand = "set|grep SSH";
+    public static String defaultLogin = "";
+    public static String defaultPassword = "";
+
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {
     }
+
 
     static ObservableList<Computer> data = null;
 //            FXCollections.observableArrayList(
