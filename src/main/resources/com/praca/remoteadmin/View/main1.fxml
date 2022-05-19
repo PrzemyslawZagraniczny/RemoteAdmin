@@ -95,6 +95,7 @@
                                     <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                   <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
                                   <TableColumn fx:id="statusCol" editable="false" minWidth="50.0" prefWidth="100.0" text="Status" />
+                                    <TableColumn fx:id="progressCol" prefWidth="75.0" text="Progress" />
                                     <TableColumn fx:id="cmdStatCol" prefWidth="75.0" text="Exit status komendy" />
                                 </columns>
                                  <columnResizePolicy>

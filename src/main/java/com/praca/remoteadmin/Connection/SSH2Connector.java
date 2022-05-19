@@ -3,13 +3,14 @@ package com.praca.remoteadmin.Connection;
 import com.jcraft.jsch.*;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
-import javafx.scene.control.Alert;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.util.TimerTask;
 
 public class SSH2Connector implements IGenericConnector{
     JSch jsch=new JSch();
@@ -27,7 +28,7 @@ public class SSH2Connector implements IGenericConnector{
 
 
     @Override
-    public boolean openConnection(String sLogin, String sPassword, Computer comp) throws JSchException {
+    public boolean openConnection(String sLogin, String sPassword, Computer comp)  {
 
 
         this.sLogin = sLogin;
@@ -40,18 +41,36 @@ public class SSH2Connector implements IGenericConnector{
             //TODO:
             //jakiś bardziej czytelny komunikat może
             System.err.println(e.getMessage());
+        } catch (JSchException e) {
+            throw new RuntimeException(e);
         }
 
         UserInfo ui=new SSHUserInfo();
         session.setUserInfo(ui);
-        session.setTimeout(ConnectionHelper.shhConnectionTimeOut);
-        session.connect();
 
+        TimerTask tt = new TimerHelper(ConnectionHelper.shhConnectionTimeOut);
+        java.util.Timer tim = new java.util.Timer();
+        tim.schedule(tt, 0,1000);
+
+        try {
+            session.setTimeout(ConnectionHelper.shhConnectionTimeOut);
+            session.connect();
+        } catch (JSchException e) {
+            tim.cancel();
+            try {
+                System.err.write(e.getMessage().getBytes(Charset.forName("UTF-8")));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+        }
+        tim.cancel();
 
         try {
             if( !session.isConnected()) {
                 //TODO: zdefiniuj własny wyjątek
                 computer.setStat(StatusType.OFFLINE);
+                computer.setProgressStatus(0);
                 throw new ExceptionInInitializerError("Połączenie nie zostało ustanowione!");
             }
             computer.setStat(StatusType.ACTIVE);
@@ -59,7 +78,7 @@ public class SSH2Connector implements IGenericConnector{
 
         }catch (NullPointerException e) {
             //TODO: jakiś bardziej czytelny komunikat może
-            System.err.println("Najpier trzeba wywołać metodę <<openConnection>>");
+            System.err.println("Najpierw trzeba wywołać metodę <<openConnection>>");
             System.err.println(e.getMessage());
             return channel.isConnected();
         }
@@ -110,6 +129,7 @@ public class SSH2Connector implements IGenericConnector{
                     break;
                 }
                 try{Thread.sleep(100);}catch(Exception ee){
+
                     ee.printStackTrace();
                 }
             }
@@ -133,6 +153,7 @@ public class SSH2Connector implements IGenericConnector{
             session = null;
             channel = null;
             computer.setStat(StatusType.OFFLINE);
+            computer.setProgressStatus(0);
         }catch (NullPointerException e) {
             System.err.println(e.getMessage());
         }
@@ -235,6 +256,20 @@ public class SSH2Connector implements IGenericConnector{
             else{
                 return null;  // cancel
             }
+        }
+    }
+    private class TimerHelper extends TimerTask {
+        double i = 0;
+        double maxTime = 0;    //max czas oczeiwania na połączenie w [ms]
+
+        public TimerHelper(int shhConnectionTimeOut) {
+            maxTime = shhConnectionTimeOut;
+        }
+
+        public void run() {
+            i += 1000;
+            computer.setProgressStatus(i/maxTime);
+            System.out.println("Wartość: "+(i/maxTime));
         }
     }
 }

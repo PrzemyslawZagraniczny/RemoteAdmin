@@ -1,13 +1,11 @@
 package com.praca.remoteadmin.Model;
 
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.scene.control.Alert;
 
 import java.awt.*;
+import java.util.TimerTask;
 
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
@@ -31,6 +29,20 @@ public class Computer {
     //czy maszyna zostala wybrana do poczenia (ustawiane checkboxem)
     private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
     private SimpleIntegerProperty cmdExitStatus = new SimpleIntegerProperty(-1);
+
+    public double getProgressStatus() {
+        return progressStatus.get();
+    }
+
+    public SimpleDoubleProperty progressStatusProperty() {
+        return progressStatus;
+    }
+
+    public void setProgressStatus(double progressStatus) {
+        this.progressStatus.set(progressStatus);
+    }
+
+    private SimpleDoubleProperty progressStatus = new SimpleDoubleProperty(0);
 
     public int getCmdExitStatus() {
         return cmdExitStatus.get();

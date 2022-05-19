@@ -12,6 +12,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
@@ -32,6 +33,10 @@ public class MainController {
     @FXML
     public TableColumn<Computer, Boolean> selectCol;
     @FXML
+    public TableColumn<Computer, Integer> cmdStatCol;
+    @FXML
+    public TableColumn<Computer,Double> progressCol;
+    @FXML
     public TableView<Computer> table;
     @FXML
     public PasswordField passwordField;
@@ -39,8 +44,9 @@ public class MainController {
     public TextField loginField;
     public TextArea consoleOutput;
     public TextField cmdLine;
-    public TableColumn cmdStatCol;
+
     public Button btConnect;
+
 
 
     public void onQuit(ActionEvent actionEvent) {
@@ -67,6 +73,13 @@ public class MainController {
                         return new CheckBoxTableCell<>();
                     }
                 });
+        progressCol.setCellFactory(
+                new Callback<TableColumn<Computer,Double>,TableCell<Computer,Double>>(){
+                    @Override public
+                    TableCell call( TableColumn p ){
+                        return new ProgressBarTableCell<>();
+                    }
+                });
 
         addressCol.setCellValueFactory(
                 new PropertyValueFactory<>("address")
@@ -77,6 +90,9 @@ public class MainController {
         );
         cmdStatCol.setCellValueFactory(
                 new PropertyValueFactory<>("cmdExitStatus")
+        );
+        progressCol.setCellValueFactory(
+                new PropertyValueFactory<>("progressStatus")
         );
 
 
@@ -136,6 +152,9 @@ public class MainController {
 
         switch (cmdType) {
             case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
+                for (CommandCallable comp:sshSessions) {
+                    comp.comp.setProgressStatus(0);
+                }
                 sshSessions.clear();
                 btConnect.setDisable(!true);
                 break;
@@ -207,15 +226,11 @@ public class MainController {
             if(conn == null) {
                 conn = new SSH2Connector();
 
-                try {
                     conn.openConnection(login, pass,  this.comp);
                     conn.setErrorStream(System.err);
                     conn.setOutputStream(new ConsoleCaptureOutput(consoleOutput));
                     //conn.setOutputStream(System.out);
-                } catch (JSchException e) {
-                    System.err.println(e.getMessage());
-                    //throw new RuntimeException(e);
-                }
+
             }
         }
 

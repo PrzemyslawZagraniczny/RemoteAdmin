@@ -19,15 +19,10 @@ class SHH2Test {
             conn = new SSH2Connector();
 
 
-            try {
-                conn.openConnection("przemek", "przemek123", comp);
-                conn.setErrorStream(System.err);
-                //conn.setOutputStream(new ConsoleCaptureOutput());
+            conn.openConnection("przemek", "przemek123", comp);
+            conn.setErrorStream(System.err);
+            //conn.setOutputStream(new ConsoleCaptureOutput());
 
-            } catch (JSchException e) {
-                System.err.println(e.getMessage());
-                throw new RuntimeException(e);
-            }
         }
         try {
 
