@@ -1,16 +1,20 @@
 package com.praca.remoteadmin.Brudnopis;
 
+import javax.print.DocFlavor;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Multithreading {
 
     final Set<CommandCallable> threads = new HashSet<>();
 
     public static void main(String[] args) {
+
         Multithreading m = new Multithreading();
         m.init();
     }

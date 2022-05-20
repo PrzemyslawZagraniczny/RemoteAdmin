@@ -17,7 +17,6 @@ public class ConsoleCaptureOutput extends OutputStream {
         txt.setWrapText(true);
         txt.setEditable(false);
         ta.clear();
-
     }
 
 

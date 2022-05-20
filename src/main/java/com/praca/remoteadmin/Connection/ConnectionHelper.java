@@ -19,6 +19,7 @@ Klasa pomocnicz służąca do:
 public class ConnectionHelper {
 
     public static int shhConnectionTimeOut = 10000;    //10 sekund
+    public static boolean bRSAKeyFingerprintIgnore = true;
     public static String defaultCommand = "set|grep SSH";
     public static String defaultLogin = "zagranic_1054469";
     public static String defaultPassword = "793691235";

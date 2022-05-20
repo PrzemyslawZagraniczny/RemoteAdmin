@@ -1,8 +1,12 @@
 package com.praca.remoteadmin.Connection;
 
 import com.jcraft.jsch.*;
+import com.praca.remoteadmin.GUI.MessageBoxTask;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,7 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SSH2Connector implements IGenericConnector{
     JSch jsch=new JSch();
@@ -58,11 +69,10 @@ public class SSH2Connector implements IGenericConnector{
         } catch (JSchException e) {
             tim.cancel();
             try {
-                System.err.write(e.getMessage().getBytes(Charset.forName("UTF-8")));
+                this.err.write( e.getMessage().getBytes(Charset.forName("UTF-8")));
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-
         }
         tim.cancel();
 
@@ -74,8 +84,6 @@ public class SSH2Connector implements IGenericConnector{
                 throw new ExceptionInInitializerError("Połączenie nie zostało ustanowione!");
             }
             computer.setStat(StatusType.ACTIVE);
-
-
         }catch (NullPointerException e) {
             //TODO: jakiś bardziej czytelny komunikat może
             System.err.println("Najpierw trzeba wywołać metodę <<openConnection>>");
@@ -161,15 +169,76 @@ public class SSH2Connector implements IGenericConnector{
 
     public class SSHUserInfo implements UserInfo, UIKeyboardInteractive {
         public String getPassword(){ return passwd; }
+
+
         public boolean promptYesNo(String str){
-            Object[] options={ "Tak", "Nie" };
-            int foo= JOptionPane.showOptionDialog(null,
+            if(checkIfIgnore(str))  //sprawdza czy ignorowac komunikat
+                return true;
+            Object[] options={ "Tak", "Nie", "Tak (Ignoruj przyszłe)" };
+            int retVal= JOptionPane.showOptionDialog(null,
                     str,
-                    "Uwaga",
+                    "Uwaga!",
                     JOptionPane.DEFAULT_OPTION,
                     JOptionPane.WARNING_MESSAGE,
                     null, options, options[0]);
-            return foo==0;
+            if(retVal == 2) {
+                //tzn zapisz komunikat do ignorowania w przyszłości
+                ConnectionHelper.bRSAKeyFingerprintIgnore = true;
+            }
+            System.out.println(str);
+            return retVal==0 || retVal == 2;
+
+//            ExecutorService executorService = Executors.newFixedThreadPool(1);
+//            MessageBoxTask task = new MessageBoxTask(str);
+//            executorService.execute(task);
+//            boolean retVal = true;
+//            try {
+//                retVal = task.get();
+//            } catch (InterruptedException e) {
+//                throw new RuntimeException(e);
+//            } catch (ExecutionException e) {
+//                throw new RuntimeException(e);
+//            }
+//            executorService.shutdown();
+
+//            Platform.runLater(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+//                    alert.setTitle("Uwaga!");
+//                    alert.setHeaderText("");
+//                    alert.setContentText(str);
+//                    System.out.println("promptYesNo OK.");
+//                    AtomicBoolean retVal = new AtomicBoolean(false);
+//                    alert.showAndWait().ifPresent(rs -> {
+//                        if (rs == ButtonType.OK) {
+//                            System.out.println("Pressed OK.");
+//                            retVal.set(true);
+//                        } else
+//                            retVal.set(false);
+//                    });
+//                    System.out.println("return OK.");
+//                    //return retVal.get();                }
+//                }
+//            });
+        }
+
+        private boolean checkIfIgnore(String str) {
+
+            if(ConnectionHelper.bRSAKeyFingerprintIgnore) {
+                String regex = "The authenticity of host '(.)*' can't be established.\n" +
+                        "RSA key fingerprint is ([a-f]|[0-9]|:)*.\n" +
+                        "Are you sure you want to continue connecting?";
+
+                Pattern r = Pattern.compile(regex);
+
+                // Now create matcher object.
+                Matcher m = r.matcher(str);
+
+                if (m.find())
+                    return true;
+            }
+            return false;
         }
 
         String passwd;

@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainController {
     @FXML
@@ -46,7 +47,8 @@ public class MainController {
     public TextField cmdLine;
 
     public Button btConnect;
-
+    public Button btnExecCmd;
+    public TabPane tabPane;
 
 
     public void onQuit(ActionEvent actionEvent) {
@@ -55,13 +57,14 @@ public class MainController {
 
     public void onSelectedAction(Event event) {
     }
+
     @FXML
     public void initialize() {
+        tabPane.getSelectionModel().select(1);      //ustaw domyślnie drugą zakładkę na starcie
         consoleOutput.autosize();
         cmdLine.setText(ConnectionHelper.defaultCommand);
         loginField.setText(ConnectionHelper.defaultLogin);
         passwordField.setText(ConnectionHelper.defaultPassword);
-
 
         statusCol.setCellValueFactory(
                 new PropertyValueFactory<Computer, String>("status")
@@ -112,6 +115,7 @@ public class MainController {
 
 //        data.get(1).setStat(StatusType.ACTIVE);
 //        if( true) return;
+        btnExecCmd.setDisable(true);
         execParallel(CmdType.SENDING_CMD);
     }
 
@@ -121,13 +125,17 @@ public class MainController {
 
 
     private void exec(CmdType cmdType) {
-        for (CommandCallable comp:sshSessions) {
-            comp.setCmdType(cmdType);
+        Set<CommandCallable> sshMachines = sshSessions;
+
+
+        for (CommandCallable comp:sshMachines) {
+            if(comp.comp.isSelected())
+                comp.setCmdType(cmdType);
         }
-        ExecutorService executorService = Executors.newFixedThreadPool(sshSessions.size());
+        ExecutorService executorService = Executors.newFixedThreadPool(sshMachines.size());
         List<Future<Computer>> futures = null;
         try {
-            futures = executorService.invokeAll(sshSessions);
+            futures = executorService.invokeAll(sshMachines);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -152,7 +160,7 @@ public class MainController {
 
         switch (cmdType) {
             case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
-                for (CommandCallable comp:sshSessions) {
+                for (CommandCallable comp:sshMachines) {
                     comp.comp.setProgressStatus(0);
                 }
                 sshSessions.clear();
@@ -160,6 +168,9 @@ public class MainController {
                 break;
             case CONNECTING:
                 btConnect.setDisable(!true);
+                break;
+            case SENDING_CMD:
+                btnExecCmd.setDisable(!true);
                 break;
             case NONE:
             default:
@@ -225,12 +236,9 @@ public class MainController {
         private void connect() {
             if(conn == null) {
                 conn = new SSH2Connector();
-
-                    conn.openConnection(login, pass,  this.comp);
-                    conn.setErrorStream(System.err);
-                    conn.setOutputStream(new ConsoleCaptureOutput(consoleOutput));
-                    //conn.setOutputStream(System.out);
-
+                conn.setErrorStream(System.err);
+                conn.setOutputStream(new ConsoleCaptureOutput(consoleOutput));
+                conn.openConnection(login, pass,  this.comp);
             }
         }
 

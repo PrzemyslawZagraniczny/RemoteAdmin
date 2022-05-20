@@ -25,7 +25,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox prefHeight="800.0" prefWidth="901.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
+<VBox prefHeight="800.0" prefWidth="901.0" xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -44,7 +44,7 @@
         </Menu>
       </menus>
     </MenuBar>
-      <TabPane style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <Tab text="Logowanie">
               <content>
@@ -95,7 +95,7 @@
                                     <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                   <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
                                   <TableColumn fx:id="statusCol" editable="false" minWidth="50.0" prefWidth="100.0" text="Status" />
-                                    <TableColumn fx:id="progressCol" prefWidth="75.0" text="Progress" />
+                                    <TableColumn fx:id="progressCol" prefWidth="75.0" text="Postęp" />
                                     <TableColumn fx:id="cmdStatCol" prefWidth="75.0" text="Exit status komendy" />
                                 </columns>
                                  <columnResizePolicy>
@@ -122,7 +122,7 @@
                               </TextArea>
                               <TextField fx:id="cmdLine" layoutX="106.0" layoutY="211.0" maxHeight="1.7976931348623157E308" minWidth="30.0" prefHeight="25.0" prefWidth="707.0" promptText="Wiersz poleceń" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="106.0" AnchorPane.rightAnchor="88.0" />
                               <Label layoutX="24.0" layoutY="215.0" prefHeight="17.0" prefWidth="127.0" text="Linia poleceń:" textAlignment="RIGHT" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="24.0" />
-                              <Button alignment="CENTER" contentDisplay="CENTER" defaultButton="true" layoutX="820.0" layoutY="211.0" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="32.0" />
+                              <Button fx:id="btnExecCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" layoutX="820.0" layoutY="211.0" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="32.0" />
                               <HBox alignment="TOP_RIGHT" layoutX="7.0" layoutY="108.0" prefHeight="31.0" prefWidth="868.0" AnchorPane.bottomAnchor="294.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="32.0">
                                  <children>
                                     <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConsolClear" prefHeight="25.0" prefWidth="120.0" text="Wyczyść konsolę">

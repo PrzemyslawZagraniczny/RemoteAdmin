@@ -11,5 +11,4 @@ public interface IGenericConnector {
     void setOutputStream(ConsoleCaptureOutput out);
     void execCommand(String cmd);
     void disconnect();
-
 }
