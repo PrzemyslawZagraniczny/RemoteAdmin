@@ -41,7 +41,7 @@ public class ConsoleCaptureInput extends InputStream {
                 e.printStackTrace();
             }
         }
-        System.out.print(str.charAt(c));
+        //System.out.print(str.charAt(c));
         return (byte) str.charAt(c++);
     }
 }

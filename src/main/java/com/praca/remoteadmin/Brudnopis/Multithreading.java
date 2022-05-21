@@ -1,5 +1,8 @@
 package com.praca.remoteadmin.Brudnopis;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+
 import javax.print.DocFlavor;
 import java.util.HashSet;
 import java.util.List;
@@ -9,14 +12,24 @@ import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+
 public class Multithreading {
 
     final Set<CommandCallable> threads = new HashSet<>();
 
-    public static void main(String[] args) {
 
-        Multithreading m = new Multithreading();
-        m.init();
+    public static void main(String[] args) {
+        //BasicConfigurator.configure();
+
+        try {
+            Thread.sleep(2555);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        //Multithreading m = new Multithreading();
+        //m.init();
     }
 
     void init() {
@@ -35,7 +48,7 @@ public class Multithreading {
         for(Future<Integer> future : futures){
             try {
                 if(future.get().intValue() != 0) {
-                    System.out.println("Wraca  <<"+future.get().intValue()+">>");
+                    //System.out.println("Wraca  <<"+future.get().intValue()+">>");
                 }
 
 

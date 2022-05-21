@@ -31,11 +31,9 @@ public class MessageBoxTask extends Task<Boolean> {
         alert.setTitle(sTitle);
         alert.setHeaderText("");
         alert.setContentText(str);
-        System.out.println("promptYesNo OK.");
         AtomicBoolean retVal = new AtomicBoolean(false);
         alert.showAndWait().ifPresent(rs -> {
             if (rs == ButtonType.OK) {
-                System.out.println("Pressed OK.");
                 retVal.set(true);
             } else
                 retVal.set(false);

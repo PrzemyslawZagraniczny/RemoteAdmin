@@ -1,11 +1,11 @@
 package com.praca.remoteadmin.Model;
 
+import com.praca.remoteadmin.Connection.ConnectionHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.scene.control.Alert;
 
 import java.awt.*;
-import java.util.TimerTask;
 
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
@@ -115,11 +115,11 @@ public class Computer {
 
     public void setSelected(boolean selected) {
         this.selected.set(selected);
-        System.out.println(selected);
+        ConnectionHelper.log.info("User "+(selected ?"selected":"unselected")+" host <<"+getAddress()+">>");
     }
 
-    public String getStat() {
-        return stat.toString();
+    public StatusType getStat() {
+        return stat;
     }
 
 

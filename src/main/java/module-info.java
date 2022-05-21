@@ -12,6 +12,7 @@ module com.praca.remoteadmin {
     requires java.desktop;
     requires jsch;
     requires org.junit.jupiter.api;
+    requires log4j;
 
     opens com.praca.remoteadmin to javafx.fxml;
     exports com.praca.remoteadmin;

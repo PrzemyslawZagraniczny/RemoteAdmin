@@ -52,8 +52,8 @@ public class JschConsole {
             while(true){
                 while(in.available()>0){
                     int i=in.read(tmp, 0, 1024);
-                    if(i<0)break;
-                    System.out.print(new String(tmp, 0, i));
+                    if(i<0)
+                        break;
                 }
                 if(channel.isClosed()){
                     if(in.available()>0) continue;

@@ -35,8 +35,6 @@ public class ConsoleCaptureOutput extends OutputStream {
 
 //        if(c == '$')
         {
-            System.out.print(buffer.toString());
-
             buffer = new StringBuffer();
         }
         if (EventQueue.isDispatchThread()) {

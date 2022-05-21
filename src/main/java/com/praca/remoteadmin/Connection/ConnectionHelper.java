@@ -1,9 +1,11 @@
 package com.praca.remoteadmin.Connection;
 
+import com.praca.remoteadmin.Brudnopis.Multithreading;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.apache.log4j.Logger;
 
 import java.io.*;
 import java.net.URI;
@@ -18,11 +20,12 @@ Klasa pomocnicz służąca do:
  */
 public class ConnectionHelper {
 
+    public static Logger log = Logger.getLogger(Multithreading.class.getName());
     public static int shhConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;
     public static String defaultCommand = "set|grep SSH";
-    public static String defaultLogin = "";
-    public static String defaultPassword = "";
+    public static String defaultLogin = "zagranic_1054469";
+    public static String defaultPassword = "793691235";
 
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {

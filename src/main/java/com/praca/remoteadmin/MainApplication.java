@@ -1,5 +1,6 @@
 package com.praca.remoteadmin;
 
+import com.praca.remoteadmin.Connection.ConnectionHelper;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,8 +22,14 @@ public class MainApplication extends Application {
 
         stage.setScene(scene);
         stage.show();
+        ConnectionHelper.log.info("App successfully started.");
     }
-
+    @Override
+    public void stop(){
+        ConnectionHelper.log.info("App successfully closed.");
+        ConnectionHelper.log.info("************************");
+        // Save file
+    }
     public static void main(String[] args) {
         launch();
     }

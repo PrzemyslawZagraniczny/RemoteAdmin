@@ -4,8 +4,10 @@ import com.jcraft.jsch.JSchException;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
 import com.praca.remoteadmin.Connection.SSH2Connector;
+import com.praca.remoteadmin.GUI.MessageBoxTask;
 import com.praca.remoteadmin.Model.CmdType;
 import com.praca.remoteadmin.Model.Computer;
+import com.praca.remoteadmin.Model.StatusType;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -60,6 +62,7 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        btnExecCmd.setDisable(true);
         tabPane.getSelectionModel().select(1);      //ustaw domyślnie drugą zakładkę na starcie
         consoleOutput.autosize();
         cmdLine.setText(ConnectionHelper.defaultCommand);
@@ -101,6 +104,7 @@ public class MainController {
 
         table.getItems().addAll(ConnectionHelper.getComputers());
     }
+
     @FXML
     public void OnLogingIn(ActionEvent actionEvent) {
         String sLogin = loginField.getText().trim();
@@ -116,6 +120,7 @@ public class MainController {
 //        data.get(1).setStat(StatusType.ACTIVE);
 //        if( true) return;
         btnExecCmd.setDisable(true);
+
         execParallel(CmdType.SENDING_CMD);
     }
 
@@ -126,19 +131,32 @@ public class MainController {
 
     private void exec(CmdType cmdType) {
         Set<CommandCallable> sshMachines = sshSessions;
+        int cntSelected = 0;
+        synchronized (sshMachines) {        //synchronizuj na maszynach (gdyby ktoś próbował kliknąć checkboxa obok maszyny)
+            for (CommandCallable comp : sshMachines) {
+                if (comp.comp.isSelected()) {
+                    comp.setCmdType(cmdType);
+                    cntSelected++;
+                }
+            }
 
+            CountDownLatch latch = new CountDownLatch(cntSelected);
+            ExecutorService executorService = Executors.newFixedThreadPool(cntSelected);
+            List<Future<Computer>> futures = null;
 
-        for (CommandCallable comp:sshMachines) {
-            if(comp.comp.isSelected())
-                comp.setCmdType(cmdType);
-        }
-        ExecutorService executorService = Executors.newFixedThreadPool(sshMachines.size());
-        List<Future<Computer>> futures = null;
-        try {
-            futures = executorService.invokeAll(sshMachines);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+            for (CommandCallable comp : sshMachines) {
+                if (comp.comp.isSelected()) {
+                    comp.setCmdType(cmdType);
+                    comp.setLatch(latch);
+                }
+            }
+
+            try {
+                futures = executorService.invokeAll(sshMachines);
+            } catch (InterruptedException e) {
+                ConnectionHelper.log.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
 
 //        for(Future<Computer> future : futures){
 //            try {
@@ -157,59 +175,108 @@ public class MainController {
 //                throw new RuntimeException(e);
 //            }
 //        }
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                ConnectionHelper.log.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
+            switch (cmdType) {
+                case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
+                    for (CommandCallable comp : sshMachines) {
+                        comp.comp.setProgressStatus(0);
+                    }
+                    sshSessions.clear();
 
-        switch (cmdType) {
-            case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
-                for (CommandCallable comp:sshMachines) {
-                    comp.comp.setProgressStatus(0);
-                }
-                sshSessions.clear();
-                btConnect.setDisable(!true);
-                break;
-            case CONNECTING:
-                btConnect.setDisable(!true);
-                break;
-            case SENDING_CMD:
-                btnExecCmd.setDisable(!true);
-                break;
-            case NONE:
-            default:
-                break;
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnExecCmd.setDisable(true);
+                            btConnect.setDisable(!true);
+                        }
+                    });
+
+                    ConnectionHelper.log.info("Disconnected from <<"+cntSelected+">> hosts.");
+                    break;
+                case CONNECTING: {
+                    cntSelected = 0;
+                    int cntConnected = 0;
+
+                    synchronized (sshSessions) {        //synchronizuj na maszynach (gdyby ktoś próbował kliknąć checkboxa obok maszyny)
+                            for (CommandCallable comp : sshSessions) {
+                                if (comp.comp.isSelected()) {
+                                    cntSelected++;
+                                }
+                                if ( comp.comp.getStat() == StatusType.ACTIVE)
+                                    cntConnected++;
+                            }
+                        }
+                        ConnectionHelper.log.info("Established connection to " + cntConnected+"/"+cntSelected + " hosts.");
+                        if(cntConnected <= 0) {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    btConnect.setDisable(!true);
+                                    btConnect.setText("Połącz");
+                                    new Thread(new MessageBoxTask("Uwaga")).start();
+                                }
+                            });
+                        }
+                        else {
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    btConnect.setDisable(!true);
+                                    btnExecCmd.setDisable(!true);
+                                }
+                            });
+                        }
+                    }
+                    break;
+                case SENDING_CMD:
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            btnExecCmd.setDisable(!true);                        }
+                    });
+                    break;
+                case NONE:
+                default:
+                    break;
+            }
+            executorService.shutdown();
         }
-
-        System.out.println("KONIEC!!!!");
-
-        executorService.shutdown();
     }
 
+    //klik na przycisk "Czyść konsolę"
     public void onConsolClear(ActionEvent actionEvent) {
         consoleOutput.clear();
     }
 
+    //klik na przycisk "Połącz"
     public void onConect(ActionEvent actionEvent) {
 
         btConnect.setDisable(true);
         if(sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
-
             btConnect.setText("Połącz");
-
-            //najpier pozamykacj wszystkie połączenia
+            //najpierw pozamykać wszystkie połączenia
             execParallel(CmdType.DISCONNECTING);
-
             return;
         }
         btConnect.setText("Rozłącz");
+
         for (Computer comp: ConnectionHelper.getComputers()) {
             sshSessions.add(new CommandCallable(comp, loginField.getText(), passwordField.getText()));
         }
+        ConnectionHelper.log.info("Trying to establish connection with hosts...");
         execParallel(CmdType.CONNECTING);
-
     }
 
     //TODO: klasę Callable do utworzenia połączenia
     //klasa do rónoległego wykonywania poleceń SSH na każdej z maszyn zdalnych
     class CommandCallable implements Callable<com.praca.remoteadmin.Model.Computer> {
         private com.praca.remoteadmin.Model.Computer comp;
+        private CountDownLatch latch;
 
         private String pass;
         private String login;
@@ -238,7 +305,8 @@ public class MainController {
                 conn = new SSH2Connector();
                 conn.setErrorStream(System.err);
                 conn.setOutputStream(new ConsoleCaptureOutput(consoleOutput));
-                conn.openConnection(login, pass,  this.comp);
+                boolean ret = conn.openConnection(login, pass,  this.comp);
+                latch.countDown();
             }
         }
 
@@ -246,12 +314,15 @@ public class MainController {
         public com.praca.remoteadmin.Model.Computer call() throws Exception {
             switch (cmdType) {
                 case CONNECTING:
+                    ConnectionHelper.log.info("Connecting to <<"+comp.getAddress()+">>...");
                     connect();
                     break;
                 case SENDING_CMD:
+                    ConnectionHelper.log.info("Querrying <<"+comp.getAddress()+">>...");
                     sndCommand();
                     break;
                 case DISCONNECTING:
+                    ConnectionHelper.log.info("Disconnecting with <<"+comp.getAddress()+">>...");
                     disconnect();
                     break;
                 case NONE:
@@ -264,15 +335,13 @@ public class MainController {
         }
 
 
-        //wysyłanie komendy
-        private boolean sndCommand() {
+        //wysyłanie komendy na zdarzenie kliku na przycisk >>
+        private synchronized boolean sndCommand() {
             if(!comp.isSelected())
                 return true;
-
             try {
-
                 String cmd = cmdLine.getText().trim();
-                conn.execCommand(cmd);
+                conn.execCommand(cmd, latch);
             } catch (Exception e) {
                 System.err.println(e.getMessage());
                 throw new RuntimeException(e);
@@ -282,6 +351,11 @@ public class MainController {
 
         public void disconnect() {
             conn.disconnect();
+            latch.countDown();
+        }
+
+        public void setLatch(CountDownLatch latch) {
+            this.latch = latch;
         }
     }
 }
