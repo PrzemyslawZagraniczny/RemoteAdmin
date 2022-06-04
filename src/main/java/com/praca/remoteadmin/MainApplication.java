@@ -6,7 +6,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class MainApplication extends Application {
     @Override
@@ -30,7 +33,17 @@ public class MainApplication extends Application {
         ConnectionHelper.log.info("************************");
         // Save file
     }
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
+
+        //TODO: Usuń w wersji finalnej!!!!
+        //wczytuje dane z pliku (TYMCZASOWO)
+        FileInputStream fis=new FileInputStream("pass.txt");
+        Scanner s=new Scanner(fis);
+        if(s.hasNextLine())
+            ConnectionHelper.defaultLogin = s.nextLine().trim();
+        if(s.hasNextLine())
+            ConnectionHelper.defaultPassword = s.nextLine().trim();
+        s.close();
         launch();
     }
 }
