@@ -1,5 +1,6 @@
 package com.praca.remoteadmin.Brudnopis;
 
+import com.praca.remoteadmin.Connection.ConnectionHelper;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
@@ -25,7 +26,8 @@ public class Multithreading {
         try {
             Thread.sleep(2555);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+
+            Thread.currentThread().interrupt();
         }
 
         //Multithreading m = new Multithreading();
@@ -42,7 +44,7 @@ public class Multithreading {
         try {
             futures = executorService.invokeAll(threads);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            Thread.currentThread().interrupt();
         }
 
         for(Future<Integer> future : futures){
@@ -53,7 +55,7 @@ public class Multithreading {
 
 
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             } catch (ExecutionException e) {
                 throw new RuntimeException(e);
             }
@@ -66,11 +68,12 @@ public class Multithreading {
     class CommandCallable implements Callable<Integer> {
 
         public CommandCallable() {
+            throw new UnsupportedOperationException();
         }
 
         @Override
         public Integer call() throws Exception {
-            Random rnd = new Random();
+            Random rnd = ConnectionHelper.rnd;
 
             int x = rnd.nextInt(10000) + 500;
             System.out.println("THREAD"+ Thread.currentThread()+ " <<"+x+">>");

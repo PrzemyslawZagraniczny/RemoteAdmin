@@ -1,7 +1,5 @@
 package com.praca.remoteadmin;
 
-import com.jcraft.jsch.JSchException;
-import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
 import com.praca.remoteadmin.Connection.SSH2Connector;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
@@ -14,7 +12,7 @@ class SHH2Test {
     @Test
     void SSH2Test() {
         SSH2Connector conn = new SSH2Connector();
-        Computer comp = new WorkStation("Jacob", "192.168.42.141", StatusType.ACTIVE);
+        Computer comp = new WorkStation("Jacob", "192.168.42.141", StatusType.CONNECTED);
         if(conn == null) {
             conn = new SSH2Connector();
 

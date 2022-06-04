@@ -1,6 +1,5 @@
 package com.praca.remoteadmin.Controller;
 
-import com.jcraft.jsch.JSchException;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
 import com.praca.remoteadmin.Connection.SSH2Connector;
@@ -9,6 +8,8 @@ import com.praca.remoteadmin.Model.CmdType;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -18,11 +19,11 @@ import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainController {
     @FXML
@@ -58,6 +59,8 @@ public class MainController {
     }
 
     public void onSelectedAction(Event event) {
+        //TODO: Zaimplementuj
+        throw new UnsupportedOperationException();
     }
 
     @FXML
@@ -68,6 +71,8 @@ public class MainController {
         cmdLine.setText(ConnectionHelper.defaultCommand);
         loginField.setText(ConnectionHelper.defaultLogin);
         passwordField.setText(ConnectionHelper.defaultPassword);
+
+        //powiązanie kolumn tabelki z properties dla obiektu Computer
 
         statusCol.setCellValueFactory(
                 new PropertyValueFactory<Computer, String>("status")
@@ -103,6 +108,46 @@ public class MainController {
 
 
         table.getItems().addAll(ConnectionHelper.getComputers());
+
+        table.setRowFactory(tv -> {
+            TableRow<Computer> row = new TableRow<>();
+
+            // use EasyBind to access the valueProperty of the itemProperty of the cell:
+//            row.disableProperty().bind(new BooleanBinding() {
+//                @Override
+//                protected boolean computeValue() {
+//                    return row.getItem().getStat() != StatusType.OFFLINE;
+//                }
+//            });
+//            row.disableProperty().bind(
+
+//                    EasyBind.select(row.itemProperty()) // start at itemProperty of row
+//                            .selectObject(Computer::statusProperty)  // map to valueProperty of item, if item non-null
+//                            .map(x -> x.ACTIVE < 5) // map to BooleanBinding via intValue of value < 5
+//                            .orElse(false)); // value to use if item was null
+
+            // it's also possible to do this with the standard API, but there are lots of
+            // superfluous warnings sent to standard out:
+            //row.disableProperty().bind( Bindings.selectBoolean(row.itemProperty(), "selected"));
+            //row.setDisable(!true);
+
+            return row ;
+        });
+//        table.sortPolicyProperty().set(new Callback<TableView<Computer>, Boolean>() {
+//            @Override
+//            public Boolean call(TableView<Computer> computerTableView) {
+//                computerTableView.getItems().sort(new Comparator<Computer>() {
+//                    @Override
+//                    public int compare(Computer o1, Computer o2) {
+//
+//                        //return o1.getAddress().compareTo(o2.getAddress());
+//                        return o1.getStat() != StatusType.OFFLINE?1:0;
+//                    }
+//                });
+//                return null;
+//            }
+//        });
+
     }
 
     @FXML
@@ -155,7 +200,7 @@ public class MainController {
                 futures = executorService.invokeAll(sshMachines);
             } catch (InterruptedException e) {
                 ConnectionHelper.log.error(e.getMessage());
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             }
 
 //        for(Future<Computer> future : futures){
@@ -170,16 +215,16 @@ public class MainController {
 //
 //
 //            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
+//                Thread.currentThread().interrupt();
 //            } catch (ExecutionException e) {
-//                throw new RuntimeException(e);
+//                Thread.currentThread().interrupt();
 //            }
 //        }
             try {
                 latch.await();
             } catch (InterruptedException e) {
                 ConnectionHelper.log.error(e.getMessage());
-                throw new RuntimeException(e);
+                Thread.currentThread().interrupt();
             }
             switch (cmdType) {
                 case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
@@ -207,7 +252,7 @@ public class MainController {
                                 if (comp.comp.isSelected()) {
                                     cntSelected++;
                                 }
-                                if ( comp.comp.getStat() == StatusType.ACTIVE)
+                                if ( comp.comp.getStat() == StatusType.CONNECTED)
                                     cntConnected++;
                             }
                         }
@@ -343,8 +388,8 @@ public class MainController {
                 String cmd = cmdLine.getText().trim();
                 conn.execCommand(cmd, latch);
             } catch (Exception e) {
-                System.err.println(e.getMessage());
-                throw new RuntimeException(e);
+                ConnectionHelper.log.error(e.getMessage());
+                Thread.currentThread().interrupt();
             }
             return false;
         }

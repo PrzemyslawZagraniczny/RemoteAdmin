@@ -1,0 +1,214 @@
+@startuml
+class com.praca.remoteadmin.GUI.ButtonStateObserver {
+~ Button btn
++ void update()
+}
+interface com.praca.remoteadmin.Connection.IGenericConnector {
+~ boolean openConnection(String,String,Computer)
+~ void setErrorStream(OutputStream)
+~ void setOutputStream(ConsoleCaptureOutput)
+~ void execCommand(String)
+~ void disconnect()
+}
+class com.praca.remoteadmin.MainApplication {
++ void start(Stage)
++ {static} void main(String[])
+}
+class com.praca.remoteadmin.Connection.ConnectionHelper {
++ {static} int shhConnectionTimeOut
++ {static} boolean bRSAKeyFingerprintIgnore
++ {static} String defaultCommand
++ {static} String defaultLogin
++ {static} String defaultPassword
+~ {static} ObservableList<Computer> data
++ {static} ObservableList<Computer> getComputers()
+}
+class com.praca.remoteadmin.Model.WorkStation {
+}
+class com.praca.remoteadmin.GUI.MessageBoxTask {
+- String str
+- Alert.AlertType type
+- String sTitle
+# Boolean call()
+}
+class com.praca.remoteadmin.Model.Computer {
+- SimpleStringProperty name
+- SimpleStringProperty address
+- SimpleStringProperty status
+- StatusType stat
+- SimpleBooleanProperty selected
+- SimpleIntegerProperty cmdExitStatus
+- SimpleDoubleProperty progressStatus
++ String getStatus()
++ SimpleStringProperty statusProperty()
++ void setStatus(String)
++ double getProgressStatus()
++ SimpleDoubleProperty progressStatusProperty()
++ void setProgressStatus(double)
++ int getCmdExitStatus()
++ SimpleIntegerProperty cmdExitStatusProperty()
++ void setCmdExitStatus(int)
++ String getName()
++ SimpleStringProperty nameProperty()
++ void setName(String)
++ String getAddress()
++ SimpleStringProperty addressProperty()
++ void setAddress(String)
++ boolean isSelected()
++ SimpleBooleanProperty selectedProperty()
++ void setSelected(boolean)
++ String getStat()
++ void setStat(StatusType)
+}
+enum com.praca.remoteadmin.Model.CmdType {
++  CONNECTING
++  SENDING_CMD
++  DISCONNECTING
++  NONE
+}
+class com.praca.remoteadmin.JschConsole {
++ {static} void main(String[])
+}
+class com.praca.remoteadmin.JschConsole.MyUserInfo {
+~ String passwd
+~ JTextField passwordField
+~ GridBagConstraints gbc
+- Container panel
++ String getPassword()
++ boolean promptYesNo(String)
++ String getPassphrase()
++ boolean promptPassphrase(String)
++ boolean promptPassword(String)
++ void showMessage(String)
++ String[] promptKeyboardInteractive(String,String,String,String[],boolean[])
+}
+class com.praca.remoteadmin.Brudnopis.Multithreading {
+~ Set<CommandCallable> threads
++ {static} void main(String[])
+~ void init()
+}
+class com.praca.remoteadmin.Brudnopis.Multithreading.CommandCallable {
++ Integer call()
+}
+class com.praca.remoteadmin.Controller.MainController {
++ MenuItem btQuit
+~ Set<CommandCallable> sshSessions
++ TableColumn<Computer,String> statusCol
++ TableColumn<Computer,String> addressCol
++ TableColumn<Computer,Boolean> selectCol
++ TableColumn<Computer,Integer> cmdStatCol
++ TableColumn<Computer,Double> progressCol
++ TableView<Computer> table
++ PasswordField passwordField
++ TextField loginField
++ TextArea consoleOutput
++ TextField cmdLine
++ Button btConnect
++ Button btnExecCmd
++ TabPane tabPane
++ void onQuit(ActionEvent)
++ void onSelectedAction(Event)
++ void initialize()
++ void OnLogingIn(ActionEvent)
++ void onExecuteCommand(ActionEvent)
+- void execParallel(CmdType)
+- void exec(CmdType)
++ void onConsolClear(ActionEvent)
++ void onConect(ActionEvent)
+}
+class com.praca.remoteadmin.Controller.MainController.CommandCallable {
+- com.praca.remoteadmin.Model.Computer comp
+- CountDownLatch latch
+- String pass
+- String login
+- SSH2Connector conn
+- CmdType cmdType
++ CmdType getCmdType()
++ void setCmdType(CmdType)
+- void connect()
++ com.praca.remoteadmin.Model.Computer call()
+- boolean sndCommand()
++ void disconnect()
++ void setLatch(CountDownLatch)
+}
+class com.praca.remoteadmin.SHH2Test {
+~ void SSH2Test()
+}
+class com.praca.remoteadmin.Connection.SSH2Connector {
+~ JSch jsch
+- Session session
+- String sLogin
+- String sPassword
+- int iPort
+- Computer computer
+- Channel channel
+- ConsoleCaptureOutput out
+- OutputStream err
+- CountDownLatch latch
++ boolean openConnection(String,String,Computer)
++ void setErrorStream(OutputStream)
++ void setOutputStream(ConsoleCaptureOutput)
++ void execCommand(String)
+- void exec(String)
++ void disconnect()
++ void execCommand(String,CountDownLatch)
+}
+class com.praca.remoteadmin.Connection.SSH2Connector.SSHUserInfo {
+~ String passwd
+~ JTextField passwordField
+~ GridBagConstraints gbc
+- Container panel
++ String getPassword()
++ boolean promptYesNo(String)
+- boolean checkIfIgnore(String)
++ String getPassphrase()
++ boolean promptPassphrase(String)
++ boolean promptPassword(String)
++ void showMessage(String)
++ String[] promptKeyboardInteractive(String,String,String,String[],boolean[])
+}
+class com.praca.remoteadmin.Connection.SSH2Connector.TimerHelper {
+~ double i
+~ double maxTime
++ void run()
+}
+enum com.praca.remoteadmin.Model.StatusType {
++  ACTIVE
++  OFFLINE
++  PENDING
++  UNKNOWN
+}
+class com.praca.remoteadmin.Connection.ConsoleCaptureOutput {
+~ TextArea txt
+~ StringBuffer buffer
++ void writeAll(String)
++ void write(int)
+}
+class com.praca.remoteadmin.Connection.ConsoleCaptureInput {
+~ TextField input
+~ String str
+~ int c
+~ BlockingQueue<String> q
++ int read()
+}
+
+
+javafx.application.Application <|-- com.praca.remoteadmin.MainApplication
+com.praca.remoteadmin.Model.Computer <|-- com.praca.remoteadmin.Model.WorkStation
+javafx.concurrent.Task <|-- com.praca.remoteadmin.GUI.MessageBoxTask
+com.praca.remoteadmin.JschConsole +.. com.praca.remoteadmin.JschConsole.MyUserInfo
+com.praca.remoteadmin.UserInfo <|.. com.praca.remoteadmin.JschConsole.MyUserInfo
+com.praca.remoteadmin.UIKeyboardInteractive <|.. com.praca.remoteadmin.JschConsole.MyUserInfo
+com.praca.remoteadmin.Brudnopis.Multithreading +.. com.praca.remoteadmin.Brudnopis.Multithreading.CommandCallable
+com.praca.remoteadmin.Brudnopis.Callable <|.. com.praca.remoteadmin.Brudnopis.Multithreading.CommandCallable
+com.praca.remoteadmin.Controller.MainController +.. com.praca.remoteadmin.Controller.MainController.CommandCallable
+com.praca.remoteadmin.Controller.Callable <|.. com.praca.remoteadmin.Controller.MainController.CommandCallable
+com.praca.remoteadmin.Connection.IGenericConnector <|.. com.praca.remoteadmin.Connection.SSH2Connector
+com.praca.remoteadmin.Connection.SSH2Connector +.. com.praca.remoteadmin.Connection.SSH2Connector.SSHUserInfo
+com.praca.remoteadmin.Connection.UserInfo <|.. com.praca.remoteadmin.Connection.SSH2Connector.SSHUserInfo
+com.praca.remoteadmin.Connection.UIKeyboardInteractive <|.. com.praca.remoteadmin.Connection.SSH2Connector.SSHUserInfo
+com.praca.remoteadmin.Connection.SSH2Connector +.. com.praca.remoteadmin.Connection.SSH2Connector.TimerHelper
+com.praca.remoteadmin.Connection.TimerTask <|-- com.praca.remoteadmin.Connection.SSH2Connector.TimerHelper
+java.io.OutputStream <|-- com.praca.remoteadmin.Connection.ConsoleCaptureOutput
+java.io.InputStream <|-- com.praca.remoteadmin.Connection.ConsoleCaptureInput
+@enduml

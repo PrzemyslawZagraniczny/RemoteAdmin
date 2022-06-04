@@ -12,6 +12,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Random;
 import java.util.TimerTask;
 
 /*
@@ -20,12 +21,13 @@ Klasa pomocnicz służąca do:
  */
 public class ConnectionHelper {
 
+    public static Random rnd = new Random();
     public static Logger log = Logger.getLogger(Multithreading.class.getName());
     public static int shhConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;
     public static String defaultCommand = "set|grep SSH";
-    public static String defaultLogin = "";
-    public static String defaultPassword = "";
+    public static String defaultLogin = "zagranic_1054469";
+    public static String defaultPassword = "793691235";
 
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {

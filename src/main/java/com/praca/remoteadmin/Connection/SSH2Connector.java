@@ -1,12 +1,8 @@
 package com.praca.remoteadmin.Connection;
 
 import com.jcraft.jsch.*;
-import com.praca.remoteadmin.GUI.MessageBoxTask;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
-import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -93,7 +84,7 @@ public class SSH2Connector implements IGenericConnector{
                 ConnectionHelper.log.error("Connection with <<" + comp.getAddress()+">> failed!");
                 //throw new ExceptionInInitializerError("Connection not established!");
             }
-            computer.setStat(StatusType.ACTIVE);
+            computer.setStat(StatusType.CONNECTED);
             ConnectionHelper.log.info("Successfully connected with <<"+computer.getAddress()+">>");
         }catch (NullPointerException e) {
             //TODO: jakiś bardziej czytelny komunikat może
@@ -153,18 +144,18 @@ public class SSH2Connector implements IGenericConnector{
                 try{Thread.sleep(100);}catch(Exception ee){
                     ConnectionHelper.log.error(ee.getMessage());
                     ee.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             }
         }catch (NullPointerException e) {
             //TODO: jakiś bardziej czytelny komunikat może
-            System.err.println("First call method <<openConnection>>");
             System.err.println(e.getMessage());
             ConnectionHelper.log.error("First call method <<openConnection>>");
             ConnectionHelper.log.error(e.getMessage());
         } catch (JSchException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+
         }finally {
             channel.disconnect();
         }
@@ -206,7 +197,8 @@ public class SSH2Connector implements IGenericConnector{
                     null, options, options[0]);
             if(retVal == 2) {
                 //tzn zapisz komunikat do ignorowania w przyszłości
-                ConnectionHelper.bRSAKeyFingerprintIgnore = true;
+                //TODO: THREAD Safe Alert!!!!
+                //ConnectionHelper.bRSAKeyFingerprintIgnore = true;
             }
             ConnectionHelper.log.warn(str+" ANSWER"+((retVal == 2 || retVal==0)?"Yes":"No"));
             return retVal==0 || retVal == 2;
@@ -251,7 +243,7 @@ public class SSH2Connector implements IGenericConnector{
 
             if(ConnectionHelper.bRSAKeyFingerprintIgnore) {
                 String regex = "The authenticity of host '(.)*' can't be established.\n" +
-                        "RSA key fingerprint is ([a-f]|[0-9]|:)*.\n" +
+                        "RSA key fingerprint is (.)*.\n" +          //([a-f]|[0-9]|:)
                         "Are you sure you want to continue connecting?";
 
                 Pattern r = Pattern.compile(regex);

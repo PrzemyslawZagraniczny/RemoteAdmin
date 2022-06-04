@@ -1,7 +1,8 @@
 package com.praca.remoteadmin.Model;
 
 public enum StatusType {
-    ACTIVE,
+    CONNECTED,
+    ONLINE,
     OFFLINE,
     PENDING,
     UNKNOWN

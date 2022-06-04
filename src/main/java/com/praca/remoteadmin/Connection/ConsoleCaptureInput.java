@@ -38,10 +38,11 @@ public class ConsoleCaptureInput extends InputStream {
                 str = q.take();
                 c = 0;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                ConnectionHelper.log.error("Application interrupted during reading in ConsoleCaptureInput object:\n"+e.getMessage());
+                Thread.currentThread().interrupt();
             }
         }
         //System.out.print(str.charAt(c));
-        return (byte) str.charAt(c++);
+        return str.charAt(c++);
     }
 }
