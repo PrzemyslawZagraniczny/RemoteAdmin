@@ -88,7 +88,6 @@ public class SSH2Connector implements IGenericConnector{
             ConnectionHelper.log.info("Successfully connected with <<"+computer.getAddress()+">>");
         }catch (NullPointerException e) {
             //TODO: jakiś bardziej czytelny komunikat może
-            System.err.println("First call method <<openConnection>>");
             System.err.println(e.getMessage());
             ConnectionHelper.log.error("First call method <<openConnection>>");
             ConnectionHelper.log.error(e.getMessage());
@@ -149,8 +148,6 @@ public class SSH2Connector implements IGenericConnector{
             }
         }catch (NullPointerException e) {
             //TODO: jakiś bardziej czytelny komunikat może
-            System.err.println(e.getMessage());
-            ConnectionHelper.log.error("First call method <<openConnection>>");
             ConnectionHelper.log.error(e.getMessage());
         } catch (JSchException e) {
             throw new RuntimeException(e);

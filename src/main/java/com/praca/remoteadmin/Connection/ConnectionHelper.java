@@ -26,8 +26,8 @@ public class ConnectionHelper {
     public static int shhConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;
     public static String defaultCommand = "set|grep SSH";
-    public static String defaultLogin = "zagranic_1054469";
-    public static String defaultPassword = "793691235";
+    public static String defaultLogin = "";
+    public static String defaultPassword = "";
 
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {
