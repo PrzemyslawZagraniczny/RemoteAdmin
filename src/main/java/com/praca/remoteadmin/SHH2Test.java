@@ -16,35 +16,33 @@ class SHH2Test {
 
     @Test
     void SSH2Test() {
+        List<String> list = null;
+
         try {
-            List<String> list;
+            list = Files.readAllLines(new File("workstations.txt").toPath());
+        } catch (IOException ex) {
+            Thread.currentThread().interrupt();
+        }
 
+        int i = 1;
+        for (String address : list) {
+            SSH2Connector conn = new SSH2Connector();
+            Computer comp = new WorkStation("Komputer " + i, address, StatusType.CONNECTED);
+            if (conn == null) {
+                conn = new SSH2Connector();
+                conn.openConnection("przemek", "przemek123", comp);
+                conn.setErrorStream(System.err);
+                //conn.setOutputStream(new ConsoleCaptureOutput());
+
+            }
             try {
-                list = Files.readAllLines(new File("workstations.txt").toPath());
-            } catch (IOException ex) {
-                return data;
+
+                conn.execCommand("ls -A");
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+                throw new RuntimeException(e);
             }
-            int i = 1;
-            for (String address: list) {
-                SSH2Connector conn = new SSH2Connector();
-                Computer comp = new WorkStation("Komputer "+i, address, StatusType.CONNECTED);
-                if (conn == null) {
-                    conn = new SSH2Connector();
-
-
-                    conn.openConnection("przemek", "przemek123", comp);
-                    conn.setErrorStream(System.err);
-                    //conn.setOutputStream(new ConsoleCaptureOutput());
-
-                }
-                try {
-
-                    conn.execCommand("ls -A");
-                } catch (Exception e) {
-                    System.err.println(e.getMessage());
-                    throw new RuntimeException(e);
-                }
-                i++;
-            }
+            i++;
+        }
     }
 }

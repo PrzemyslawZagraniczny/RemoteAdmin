@@ -36,7 +36,6 @@ public class MainApplication extends Application {
     }
     public static void main(String[] args) throws FileNotFoundException {
 
-        ConnectionHelper.rnd = new Random();
         //TODO: Usuń w wersji finalnej!!!!
         //wczytuje dane z pliku (TYMCZASOWO)
         FileInputStream fis=new FileInputStream("pass.txt");

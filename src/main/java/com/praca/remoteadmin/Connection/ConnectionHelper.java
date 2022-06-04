@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.TimerTask;
@@ -21,7 +22,7 @@ Klasa pomocnicz służąca do:
  */
 public class ConnectionHelper {
 
-    public static Random rnd = null;
+    public static Random rnd = new SecureRandom ();
     public static Logger log = Logger.getLogger(Multithreading.class.getName());
     public static int shhConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;
