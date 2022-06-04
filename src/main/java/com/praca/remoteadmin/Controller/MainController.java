@@ -108,46 +108,6 @@ public class MainController {
 
 
         table.getItems().addAll(ConnectionHelper.getComputers());
-
-        table.setRowFactory(tv -> {
-            TableRow<Computer> row = new TableRow<>();
-
-            // use EasyBind to access the valueProperty of the itemProperty of the cell:
-//            row.disableProperty().bind(new BooleanBinding() {
-//                @Override
-//                protected boolean computeValue() {
-//                    return row.getItem().getStat() != StatusType.OFFLINE;
-//                }
-//            });
-//            row.disableProperty().bind(
-
-//                    EasyBind.select(row.itemProperty()) // start at itemProperty of row
-//                            .selectObject(Computer::statusProperty)  // map to valueProperty of item, if item non-null
-//                            .map(x -> x.ACTIVE < 5) // map to BooleanBinding via intValue of value < 5
-//                            .orElse(false)); // value to use if item was null
-
-            // it's also possible to do this with the standard API, but there are lots of
-            // superfluous warnings sent to standard out:
-            //row.disableProperty().bind( Bindings.selectBoolean(row.itemProperty(), "selected"));
-            //row.setDisable(!true);
-
-            return row ;
-        });
-//        table.sortPolicyProperty().set(new Callback<TableView<Computer>, Boolean>() {
-//            @Override
-//            public Boolean call(TableView<Computer> computerTableView) {
-//                computerTableView.getItems().sort(new Comparator<Computer>() {
-//                    @Override
-//                    public int compare(Computer o1, Computer o2) {
-//
-//                        //return o1.getAddress().compareTo(o2.getAddress());
-//                        return o1.getStat() != StatusType.OFFLINE?1:0;
-//                    }
-//                });
-//                return null;
-//            }
-//        });
-
     }
 
     @FXML

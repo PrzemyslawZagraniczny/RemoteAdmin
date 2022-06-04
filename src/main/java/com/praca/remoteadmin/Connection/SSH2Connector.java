@@ -142,7 +142,7 @@ public class SSH2Connector implements IGenericConnector{
                 }
                 try{Thread.sleep(100);}catch(Exception ee){
                     ConnectionHelper.log.error(ee.getMessage());
-                    ee.printStackTrace();
+                    //ee.printStackTrace();
                     Thread.currentThread().interrupt();
                 }
             }
@@ -150,9 +150,10 @@ public class SSH2Connector implements IGenericConnector{
             //TODO: jakiś bardziej czytelny komunikat może
             ConnectionHelper.log.error(e.getMessage());
         } catch (JSchException e) {
-            throw new RuntimeException(e);
+            ConnectionHelper.log.error(e.getMessage());
+            Thread.currentThread().interrupt();
         } catch (IOException e) {
-
+            ConnectionHelper.log.error(e.getMessage());
         }finally {
             channel.disconnect();
         }
