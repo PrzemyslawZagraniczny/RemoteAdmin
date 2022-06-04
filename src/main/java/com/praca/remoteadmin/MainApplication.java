@@ -9,6 +9,7 @@ import javafx.stage.Stage;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Random;
 import java.util.Scanner;
 
 public class MainApplication extends Application {
@@ -35,6 +36,7 @@ public class MainApplication extends Application {
     }
     public static void main(String[] args) throws FileNotFoundException {
 
+        ConnectionHelper.rnd = new Random();
         //TODO: Usuń w wersji finalnej!!!!
         //wczytuje dane z pliku (TYMCZASOWO)
         FileInputStream fis=new FileInputStream("pass.txt");

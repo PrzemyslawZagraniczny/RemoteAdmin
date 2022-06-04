@@ -21,7 +21,7 @@ Klasa pomocnicz służąca do:
  */
 public class ConnectionHelper {
 
-    public static Random rnd = new Random();
+    public static Random rnd = null;
     public static Logger log = Logger.getLogger(Multithreading.class.getName());
     public static int shhConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;

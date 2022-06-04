@@ -6,28 +6,45 @@ import com.praca.remoteadmin.Model.StatusType;
 import com.praca.remoteadmin.Model.WorkStation;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.List;
+
 class SHH2Test {
 
 
     @Test
     void SSH2Test() {
-        SSH2Connector conn = new SSH2Connector();
-        Computer comp = new WorkStation("Jacob", "192.168.42.141", StatusType.CONNECTED);
-        if(conn == null) {
-            conn = new SSH2Connector();
-
-
-            conn.openConnection("przemek", "przemek123", comp);
-            conn.setErrorStream(System.err);
-            //conn.setOutputStream(new ConsoleCaptureOutput());
-
-        }
         try {
+            List<String> list;
 
-            conn.execCommand("ls -A");
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-            throw new RuntimeException(e);
-        }
+            try {
+                list = Files.readAllLines(new File("workstations.txt").toPath());
+            } catch (IOException ex) {
+                return data;
+            }
+            int i = 1;
+            for (String address: list) {
+                SSH2Connector conn = new SSH2Connector();
+                Computer comp = new WorkStation("Komputer "+i, address, StatusType.CONNECTED);
+                if (conn == null) {
+                    conn = new SSH2Connector();
+
+
+                    conn.openConnection("przemek", "przemek123", comp);
+                    conn.setErrorStream(System.err);
+                    //conn.setOutputStream(new ConsoleCaptureOutput());
+
+                }
+                try {
+
+                    conn.execCommand("ls -A");
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    throw new RuntimeException(e);
+                }
+                i++;
+            }
     }
 }
