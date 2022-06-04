@@ -14,3 +14,7 @@ Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zd
 
 ## wersja beta 0.8.0
 <li>Dodane współbieżne logowanie/wylogowanie wraz z aktualizacją statusu operacji.</li>
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=PrzemyslawZagraniczny_RemoteAdmin&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=PrzemyslawZagraniczny_RemoteAdmin)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=PrzemyslawZagraniczny_RemoteAdmin&metric=bugs)](https://sonarcloud.io/summary/new_code?id=PrzemyslawZagraniczny_RemoteAdmin)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=PrzemyslawZagraniczny_RemoteAdmin&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=PrzemyslawZagraniczny_RemoteAdmin)
