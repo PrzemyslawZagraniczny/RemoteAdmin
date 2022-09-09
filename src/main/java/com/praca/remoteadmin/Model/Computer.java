@@ -3,6 +3,9 @@ package com.praca.remoteadmin.Model;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 
 import java.awt.*;

@@ -10,6 +10,10 @@ import com.praca.remoteadmin.Model.StatusType;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.binding.When;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -77,6 +81,9 @@ public class MainController {
         statusCol.setCellValueFactory(
                 new PropertyValueFactory<Computer, String>("status")
         );
+        addressCol.setCellValueFactory(
+                new PropertyValueFactory<>("address")
+        );
         selectCol.setCellFactory(
                 new Callback<TableColumn<Computer,Boolean>,TableCell<Computer,Boolean>>(){
                     @Override public
@@ -92,9 +99,7 @@ public class MainController {
                     }
                 });
 
-        addressCol.setCellValueFactory(
-                new PropertyValueFactory<>("address")
-        );
+
 
         selectCol.setCellValueFactory(
                 new PropertyValueFactory<>("selected")
@@ -108,6 +113,7 @@ public class MainController {
 
 
         table.getItems().addAll(ConnectionHelper.getComputers());
+
     }
 
     @FXML
@@ -118,12 +124,11 @@ public class MainController {
         //szyfruj hasło i login zaraz po przejęciu od użytkownika oraz zeruj ich wartości w polach
     }
 
+    //uruchamia przesłanie polecenia Shell'a poprez SSH do zdalnych maszyn
     public void onExecuteCommand(ActionEvent actionEvent)  {
 
-        //TODO: Pilnie zmień kod. Połaczenie musi być wykonywane osobno
-
-//        data.get(1).setStat(StatusType.ACTIVE);
-//        if( true) return;
+        //        data.get(1).setStat(StatusType.ACTIVE);
+        //        if( true) return;
         btnExecCmd.setDisable(true);
 
         execParallel(CmdType.SENDING_CMD);

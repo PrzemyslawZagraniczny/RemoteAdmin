@@ -1,0 +1,54 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x00007f5290d00d57, pid=26143, tid=26169
+#
+# JRE version: OpenJDK Runtime Environment Corretto-11.0.16.9.1 (11.0.16.1+9) (build 11.0.16.1+9-LTS)
+# Java VM: OpenJDK 64-Bit Server VM Corretto-11.0.16.9.1 (11.0.16.1+9-LTS, mixed mode, tiered, compressed oops, g1 gc, linux-amd64)
+# Problematic frame:
+# C  [libc.so.6+0x39d57]
+#
+# No core dump will be written. Core dumps have been disabled. To enable core dumping, try "ulimit -c unlimited" before starting Java again
+#
+# If you would like to submit a bug report, please visit:
+#   https://github.com/corretto/corretto-11/issues/
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  S U M M A R Y ------------
+
+Command Line: -javaagent:/home/Aplikacje/idea-IC-222.3739.54/lib/idea_rt.jar=46525:/home/Aplikacje/idea-IC-222.3739.54/bin -Dfile.encoding=UTF-8 --module-path=/root/.m2/repository/com/gluonhq/attach/audio/4.0.9/audio-4.0.9.jar:/root/.m2/repository/com/github/almasb/fxgl-entity/11.17/fxgl-entity-11.17.jar:/root/.m2/repository/org/openjfx/javafx-web/11.0.2/javafx-web-11.0.2-linux.jar:/root/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.12.1/jackson-annotations-2.12.1.jar:/root/.m2/repository/org/openjfx/javafx-base/11.0.2/javafx-base-11.0.2-linux.jar:/root/.m2/repository/com/jcraft/jsch/0.1.55/jsch-0.1.55.jar:/root/.m2/repository/org/openjfx/javafx-media/11.0.2/javafx-media-11.0.2-linux.jar:/root/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.12.1/jackson-core-2.12.1.jar:/root/.m2/repository/org/junit/platform/junit-platform-commons/1.8.2/junit-platform-commons-1.8.2.jar:/root/.m2/repository/com/gluonhq/attach/lifecycle/4.0.9/lifecycle-4.0.9.jar:/root/.m2/repository/org/jetbrains/kotlin/kotlin-stdlib/1.5.10/kotlin-stdlib-1.5.10-modular.jar:/mnt/hgfs/java_projects/RemoteAdmin/target/classes:/root/.m2/repository/eu/hansolo/tilesfx/11.48/tilesfx-11.48.jar:/root/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.8.2/junit-jupiter-api-5.8.2.jar:/root/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.12.1/jackson-databind-2.12.1.jar:/root/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/root/.m2/repository/org/openjfx/javafx-controls/11.0.2/javafx-controls-11.0.2-linux.jar:/root/.m2/repository/org/openjfx/javafx-fxml/11.0.2/javafx-fxml-11.0.2-linux.jar:/root/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/root/.m2/repository/com/gluonhq/attach/storage/4.0.9/storage-4.0.9.jar:/root/.m2/repository/org/kordamp/bootstrapfx/bootstrapfx-core/0.4.0/bootstrapfx-core-0.4.0.jar:/root/.m2/repository/com/github/almasb/fxgl-core/11.17/fxgl-core-11.17.jar:/root/.m2/repository/com/github/almasb/fxgl/11.17/fxgl-11.17.jar:/root/.m2/repository/org/kordamp/ikonli/ikonli-javafx/12.3.0/ikonli-javafx-12.3.0.jar:/root/.m2/repository/com/github/alm-Djdk.module.main=com.praca.remoteadmin com.praca.remoteadmin/com.praca.remoteadmin.MainApplication --add-exports=javafx.base/com.sun.javafx.reflect=ALL-UNNAMED --add-exports=javafx.graphics/com.sun.javafx.util=ALL-UNNAMED --module-path /opt/javafx-sdk-11.0.2/lib/ --add-modules=javafx.controls,javafx.media,javafx.fxml
+
+Host: Intel(R) Core(TM) i5-4590S CPU @ 3.00GHz, 2 cores, 3G, DebianEdu/Skolelinux
+Time: Tue Sep  6 10:39:06 2022 CEST elapsed time: 111.346043 seconds (0d 0h 1m 51s)
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x00007f5288491000):  JavaThread "JavaFX Application Thread" [_thread_in_native, id=26169, stack(0x00007f522a824000,0x00007f522a925000)]
+
+Stack: [0x00007f522a824000,0x00007f522a925000],  sp=0x00007f522a923430,  free space=1021k
+Native frames: (J=compiled Java code, A=aot compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libc.so.6+0x39d57]
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  com.sun.glass.ui.gtk.GtkApplication._runLoop(Ljava/lang/Runnable;Z)V+0 javafx.graphics
+j  com.sun.glass.ui.gtk.GtkApplication.lambda$runLoop$11(Ljava/lang/Runnable;Z)V+7 javafx.graphics
+j  com.sun.glass.ui.gtk.GtkApplication$$Lambda$116.run()V+12 javafx.graphics
+j  java.lang.Thread.run()V+11 java.base@11.0.16.1
+v  ~StubRoutines::call_stub
+
+siginfo: si_signo: 11 (SIGSEGV), si_code: 128 (SI_KERNEL), si_addr: 0x0000000000000000
+
+Register to memory mapping:
+
+RAX=0x0010699a46197450 is an unknown value
+RBX=0x0000000000000001 is an unknown value
+RCX=0x0 is NULL
+RDX=0x00007f52402f506f points into unknown readable memory: 00
+RSP=0x00007f522a923430 is pointing into the stack for thread: 0x00007f5288491000
+RBP=0x0000000000000001 is an unknown value
+RSI=0x0000000000000001 is an unknown value
+RDI=0x00007f5290e81960: <offset 0x00000000001ba960> in /lib/x86_64-linux-gnu/libc.so.6 at 0x00007f5290cc7000
+R8 =0x0 is NULL
+R9 =0x00007f525000c5d0 points into unknown readable memory: 0x00007f5290c23ea0 | a0 3e c2 90 52 7f

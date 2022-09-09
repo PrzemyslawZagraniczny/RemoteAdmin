@@ -1,3 +1,4 @@
+# znak '#' na początku ignoruje maszynę podczas czytania pliku
 192.168.42.109
 192.168.42.131
 spk-ssh.if.uj.edu.pl
