@@ -1,6 +1,9 @@
 # RemoteAdmin
 Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zdalnej synchronizachi poleceń na wielu stacjach roboczych.
-## wersja beta 1.0.0
+## wersja 1.0.2
+Artefakt w out/artifacts/RemoteAdmin_jar/RemoteAdmin.jar
+
+## wersja 1.0.0
 <li>Program przydziela komputery do pracowni (aktualny plik danych - <b><i>data.json</i></b>).</li>
 <li>Ustawienia maksymalnych czasów w zakładce ustawienia.</li>
 <li>Dodana obsługa komendy <b><i>SUDO</b></i>.</li>
