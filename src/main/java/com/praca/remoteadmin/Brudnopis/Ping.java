@@ -1,6 +1,7 @@
 package com.praca.remoteadmin.Brudnopis;
 
 import com.praca.remoteadmin.Connection.ConnectionHelper;
+import com.praca.remoteadmin.Utils.ExitStatusMapper;
 
 import java.io.*;
 import java.net.*;
@@ -23,10 +24,11 @@ class Ping
     public static void main(String[] args)
             throws IOException
     {
-        String ipAddress = "127.0.0.1";
+
+        String ipAddress = "192.168.42.141";
         sendPingRequest(ipAddress);
 
         ipAddress = "spk-ssh.if.uj.edu.pl";
-        sendPingRequest(ipAddress);
+        //sendPingRequest(ipAddress);
     }
 }

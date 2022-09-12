@@ -8,6 +8,7 @@ import javafx.scene.input.KeyEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,11 +21,17 @@ public class ConsoleCaptureInput extends InputStream {
     public ConsoleCaptureInput(TextField input) {
         this.input = input;
         input.clear();
+
         input.setOnKeyReleased(e -> {
             if (e.getCode().equals(KeyCode.ENTER)) {            //akceptuj komende tylko po kliku na ENTER
                 q.add(input.getText()+"\0");
+//                try {
+//                    //System.in.read((input.getText()+'\n').getBytes(StandardCharsets.UTF_8));
+//                } catch (IOException ex) {
+//                    throw new RuntimeException(ex);
+//                }
                 input.setText("");
-                str = "";
+                str += "";
                 c = 0;
 
             }
@@ -42,7 +49,7 @@ public class ConsoleCaptureInput extends InputStream {
                 Thread.currentThread().interrupt();
             }
         }
-        //System.out.print(str.charAt(c));
+        System.out.print(str.charAt(c));
         return str.charAt(c++);
     }
 }

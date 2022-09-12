@@ -1,0 +1,36 @@
+[
+    {
+      "id": 1,
+      "name": "Pracownia Komputerowa 1",
+      "computers": [
+        {
+          "name": "Komputer 1",
+          "address": "192.168.42.141"
+        },
+        {
+          "name": "Komputer 2",
+          "address": "192.168.42.107"
+        }
+      ]
+    },
+  {
+    "id": 2,
+    "name": "Pracownia Komputerowa 2",
+    "computers": [
+      {
+        "name": "Komputer 3",
+        "address": "192.168.42.131"
+      },
+      {
+        "name": "Komputer 4",
+        "address": "192.168.42.112"
+      },
+
+      {
+        "name": "Komputer 5",
+        "address": "192.168.42.109"
+      }
+    ]
+  }
+
+]

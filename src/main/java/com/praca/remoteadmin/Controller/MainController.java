@@ -6,14 +6,11 @@ import com.praca.remoteadmin.Connection.SSH2Connector;
 import com.praca.remoteadmin.GUI.MessageBoxTask;
 import com.praca.remoteadmin.Model.CmdType;
 import com.praca.remoteadmin.Model.Computer;
+import com.praca.remoteadmin.Model.LabRoom;
 import com.praca.remoteadmin.Model.StatusType;
+import com.praca.remoteadmin.Utils.Settings;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.StringBinding;
-import javafx.beans.binding.When;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -23,16 +20,36 @@ import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.regex.Pattern;
+
+import static com.praca.remoteadmin.Utils.DataFormatEnum.JSON;
 
 public class MainController {
     @FXML
     public MenuItem btQuit;
 
+    //roomsPane
+    @FXML
+    public TableView<LabRoom> tableRooms;
+    @FXML
+    public CheckBox chkSelectAllRooms;
+    @FXML
+    public TableColumn<LabRoom,String> roomNameCol;
+    @FXML
+    public TableColumn<LabRoom, Boolean> selectRoomCol;
+    @FXML
+    public TableColumn<LabRoom, Integer>  noCompInRoomCol;
+    @FXML
+    public TableColumn<LabRoom,Double> progressRoomCol;
+
+
+    //computersPane
+    @FXML
+    public CheckBox chkSelectAll;
     final Set<CommandCallable> sshSessions = new HashSet<CommandCallable>();
     @FXML
     public TableColumn<Computer, String> statusCol;
@@ -50,12 +67,22 @@ public class MainController {
     public PasswordField passwordField;
     @FXML
     public TextField loginField;
+    @FXML
+    public TextField txtSudoTm;
+    @FXML
+    public TextField txtSshTm;
+
+    @FXML
+    public ComboBox<LabRoom> cbSala;
     public TextArea consoleOutput;
     public TextField cmdLine;
 
     public Button btConnect;
     public Button btnExecCmd;
     public TabPane tabPane;
+
+    //kontener na sale laboratoryjne z komputerami
+    ObservableList<LabRoom> sale = null;//FXCollections.observableArrayList(new LabRoom(1,"Sala A"), new LabRoom(2,"Sala B"));
 
 
     public void onQuit(ActionEvent actionEvent) {
@@ -69,6 +96,11 @@ public class MainController {
 
     @FXML
     public void initialize() {
+        Settings.loadSettings();
+        txtSudoTm.setText(ConnectionHelper.sudoConnectionTimeOut+"");
+        txtSshTm.setText(ConnectionHelper.sshConnectionTimeOut +"");
+
+
         btnExecCmd.setDisable(true);
         tabPane.getSelectionModel().select(1);      //ustaw domyślnie drugą zakładkę na starcie
         consoleOutput.autosize();
@@ -77,6 +109,17 @@ public class MainController {
         passwordField.setText(ConnectionHelper.defaultPassword);
 
         //powiązanie kolumn tabelki z properties dla obiektu Computer
+
+        roomNameCol.setCellValueFactory( new PropertyValueFactory<LabRoom, String>("name"));
+        selectRoomCol.setCellValueFactory( new PropertyValueFactory<LabRoom, Boolean>("selected"));
+        noCompInRoomCol.setCellValueFactory( new PropertyValueFactory<LabRoom, Integer>("numberOfComputers"));
+        selectRoomCol.setCellFactory(
+                new Callback<TableColumn<LabRoom,Boolean>,TableCell<LabRoom,Boolean>>(){
+                    @Override public
+                    TableCell<LabRoom,Boolean> call( TableColumn<LabRoom,Boolean> p ){
+                        return new CheckBoxTableCell<>();
+                    }
+                });
 
         statusCol.setCellValueFactory(
                 new PropertyValueFactory<Computer, String>("status")
@@ -112,7 +155,18 @@ public class MainController {
         );
 
 
-        table.getItems().addAll(ConnectionHelper.getComputers());
+        sale = ConnectionHelper.loadData(JSON);
+        if(sale == null) {
+            //TODO: błąd wczytania (do logera i na ekran)
+            return;
+        }
+        cbSala.setItems(sale);
+        cbSala.setEditable(false);
+        if (sale.size() > 0)
+            cbSala.getSelectionModel().select(sale.get(0));
+        LabRoom room = sale.get(0);
+        table.getItems().addAll(room.getComputers());
+        tableRooms.getItems().addAll(sale);
 
     }
 
@@ -130,8 +184,38 @@ public class MainController {
         //        data.get(1).setStat(StatusType.ACTIVE);
         //        if( true) return;
         btnExecCmd.setDisable(true);
+        String cmd = cmdLine.getText().trim();
+        if(checkIfSudoCommand(cmd)) {
 
+            SSH2Connector.setSudoPassword();
+
+//            final FutureTask query = new FutureTask(new Callable() {
+//                @Override
+//                public Object call() throws Exception {
+//                    return SSH2Connector.setSudoPassword();
+//                }
+//            });
+//            //Platform.runLater(query);
+//            query.run();
+//
+//            try {
+//                if(query.get() != null)
+//                    System.out.println("Pass validated");
+//            } catch (InterruptedException e) {
+//                ConnectionHelper.log.error(e.getMessage());
+//            } catch (ExecutionException e) {
+//                ConnectionHelper.log.error(e.getMessage());
+//            }
+
+        }
         execParallel(CmdType.SENDING_CMD);
+    }
+
+    private boolean checkIfSudoCommand(String cmd) {
+        if(Pattern.matches("^sudo.*", cmd) )
+            return true;
+        else
+            return false;
     }
 
     private void execParallel(CmdType cmdType) {
@@ -223,6 +307,7 @@ public class MainController {
                         }
                         ConnectionHelper.log.info("Established connection to " + cntConnected+"/"+cntSelected + " hosts.");
                         if(cntConnected <= 0) {
+                            cntConnected = 0;
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
@@ -247,7 +332,8 @@ public class MainController {
                     Platform.runLater(new Runnable() {
                         @Override
                         public void run() {
-                            btnExecCmd.setDisable(!true);                        }
+                            btnExecCmd.setDisable(!true);
+                        }
                     });
                     break;
                 case NONE:
@@ -275,11 +361,59 @@ public class MainController {
         }
         btConnect.setText("Rozłącz");
 
-        for (Computer comp: ConnectionHelper.getComputers()) {
-            sshSessions.add(new CommandCallable(comp, loginField.getText(), passwordField.getText()));
+        //sale = ConnectionHelper.loadData(JSON);
+        if(sale == null) {
+            //TODO: błąd wczytania (do logera i na ekran)
+            return;
+        }
+        //LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
+        for(LabRoom room : sale) {
+            for (Computer comp : room.getComputers()) {
+                sshSessions.add(new CommandCallable(comp, loginField.getText(), passwordField.getText()));
+            }
         }
         ConnectionHelper.log.info("Trying to establish connection with hosts...");
         execParallel(CmdType.CONNECTING);
+    }
+
+    public void salaSelect(ActionEvent actionEvent) {
+        int indx = cbSala.getSelectionModel().getSelectedIndex();
+        table.getItems().clear();
+        table.getItems().addAll(sale.get(indx).getComputers());
+        table.refresh();
+    }
+
+    public void selectAllComputers(ActionEvent actionEvent) {
+        LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
+        boolean bNewState = chkSelectAll.isSelected();
+        //chkSelectAll.setStyle("-fx-color: rgba(255,255,255,.5);-fx-opacity: 0.60;");
+        for (Computer comp: room.getComputers()) {
+            if(comp.getStat() == StatusType.CONNECTED) {
+                //TODO: rozłącz i wyłącz z kolejnych zadań
+
+            }
+            else {
+
+            }
+            comp.setSelected(bNewState);
+
+        }
+    }
+
+    public void sshTmChanged(ActionEvent actionEvent) {
+        saveSettings();
+    }
+
+
+    public void sudoTmChanged(ActionEvent actionEvent) {
+        saveSettings();
+    }
+
+    @FXML
+    private void saveSettings() {
+        ConnectionHelper.sudoConnectionTimeOut = Integer.parseInt(txtSudoTm.getText());
+        ConnectionHelper.sshConnectionTimeOut = Integer.parseInt(txtSshTm.getText());
+        Settings.saveData();
     }
 
     //TODO: klasę Callable do utworzenia połączenia

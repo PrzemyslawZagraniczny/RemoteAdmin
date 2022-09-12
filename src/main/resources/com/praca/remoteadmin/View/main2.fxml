@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<VBox prefHeight="800.0" prefWidth="901.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
+  <children>
+    <MenuBar VBox.vgrow="NEVER">
+      <menus>
+        <Menu mnemonicParsing="false" text="Opcje">
+          <items>
+            <MenuItem mnemonicParsing="false" text="Zamknij połączenia" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem fx:id="btQuit" mnemonicParsing="false" onAction="#onQuit" text="Koniec" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Pomoc">
+          <items>
+            <MenuItem mnemonicParsing="false" text="O Programie RemoteAdmin" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+      <TabPane fx:id="tabPane" prefHeight="223.0" prefWidth="901.0" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+            <Tab text="Logowanie">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  <GridPane alignment="center" hgap="10" prefHeight="309.0" prefWidth="901.0" vgap="10" xmlns:fx="http://javafx.com/fxml">
+                      <padding>
+                        <Insets bottom="10" left="25" right="25" top="25" />
+                     </padding>
+                      <Text text="Wprowadż jednorazowo login i haso dla wszystkich maszyn." GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
+                        <font>
+                           <Font size="15.0" />
+                        </font>
+                     </Text>
+
+                            <Label text="Login:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+
+                            <TextField fx:id="loginField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                            <Label text="Hasło:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+
+                            <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                      <HBox alignment="bottom_right" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+                            <Text fx:id="actiontarget" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                     <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
+                  </GridPane>
+              </content>
+            </Tab>
+            <Tab text="Akcja">
+              <content>
+                  <VBox maxHeight="1.7976931348623157E308" prefHeight="326.0" prefWidth="901.0">
+                     <children>
+                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="286.0" prefWidth="885.0" style="-fx-background-color: transparent;">
+                           <children>
+                              <TableView fx:id="table" editable="true" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="257.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="2.0">
+                                <columns>
+                                    <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
+                                  <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
+                                  <TableColumn fx:id="statusCol" editable="false" minWidth="50.0" prefWidth="100.0" text="Status" />
+                                    <TableColumn fx:id="progressCol" prefWidth="75.0" text="Postęp" />
+                                    <TableColumn fx:id="cmdStatCol" prefWidth="75.0" text="Exit status komendy" />
+                                </columns>
+                                 <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                                 <opaqueInsets>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </opaqueInsets>
+                              </TableView>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="459.0" prefWidth="901.0">
+                           <children>
+                              <HBox alignment="TOP_RIGHT" layoutX="7.0" layoutY="108.0" prefHeight="0.0" prefWidth="862.0" AnchorPane.bottomAnchor="294.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="32.0">
+                                 <opaqueInsets>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </opaqueInsets>
+                              </HBox>
+                           </children>
+                        </AnchorPane>
+                        <TextArea fx:id="consoleOutput" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" prefHeight="242.0" prefWidth="861.0" scrollLeft="11.0" scrollTop="11.0" wrapText="true">
+                           <padding>
+                              <Insets top="10.0" />
+                           </padding>
+                           <opaqueInsets>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </opaqueInsets>
+                        </TextArea>
+                        <TextField fx:id="cmdLine" maxHeight="1.7976931348623157E308" minWidth="30.0" prefHeight="25.0" prefWidth="649.0" promptText="Wiersz poleceń" />
+                        <Label prefHeight="17.0" prefWidth="127.0" text="Linia poleceń:" textAlignment="RIGHT" />
+                        <Button fx:id="btnExecCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" />
+                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConsolClear" prefHeight="25.0" prefWidth="161.0" text="Wyczyść konsolę" />
+                        <Button fx:id="btConnect" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConect" prefHeight="25.0" prefWidth="144.0" style="-fx-border-color: black;" text="Połącz">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Button>
+                     </children>
+                  </VBox>
+              </content>
+               <tooltip>
+                  <Tooltip text="Panel w którym mamy dostep do maszyn" />
+               </tooltip>
+            </Tab>
+          <Tab disable="true" text="Ustawienia">
+               <content>
+                  <VBox prefHeight="455.0" prefWidth="901.0" spacing="10.0" style="-fx-alignment: TOP_CENTER;">
+                     <opaqueInsets>
+                        <Insets bottom="11.0" left="11.0" right="11.0" top="11.0" />
+                     </opaqueInsets>
+                     <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                     <children>
+                        <CheckBox mnemonicParsing="false" text="CheckBox" />
+                        <Label lineSpacing="10.0" prefHeight="17.0" prefWidth="135.0" style="-fx-alignment: CENTER;" text="Label" textAlignment="CENTER" />
+                        <Button lineSpacing="11.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="134.0" text="Button" />
+                     </children>
+                  </VBox>
+               </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+  </children>
+</VBox>

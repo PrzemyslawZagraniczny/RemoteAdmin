@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -51,21 +52,19 @@
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                   <GridPane alignment="center" hgap="10" vgap="10" xmlns:fx="http://javafx.com/fxml">
                       <padding><Insets bottom="10" left="25" right="25" top="25" /></padding>
-                      <Text text="Wprowadż jednorazowo login i haso dla wszystkich maszyn." GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="0">
+                      <Text text="Wprowadż jednorazowo login i haso dla wszystkich maszyn." GridPane.columnSpan="2">
                         <font>
                            <Font size="15.0" />
                         </font></Text>
 
-                      <Label text="Login:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                      <Label text="Login:" GridPane.rowIndex="1" />
 
                       <TextField fx:id="loginField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                      <Label text="Hasło:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                      <Label text="Hasło:" GridPane.rowIndex="2" />
 
                       <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                      <HBox alignment="bottom_right" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="4">
-                          <Button onAction="#OnLogingIn" text="Zaloguj się" />
-                      </HBox>
+                      <HBox alignment="bottom_right" spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
                       <Text fx:id="actiontarget" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                      <columnConstraints>
@@ -84,13 +83,45 @@
                   </GridPane>
               </content>
             </Tab>
-            <Tab text="Akcja">
+            <Tab text="Sale">
+               <content>
+                  <VBox maxHeight="1.7976931348623157E308" prefHeight="629.0" prefWidth="901.0">
+                     <children>
+                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="286.0" prefWidth="885.0" style="-fx-background-color: transparent;">
+                           <children>
+                              <TableView fx:id="tableRooms" editable="true" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="448.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-208.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
+                                 <columns>
+                                    <TableColumn fx:id="selectRoomCol" prefWidth="75.0" text="Zaznacz" />
+                                    <TableColumn fx:id="roomNameCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Sala" />
+                                    <TableColumn fx:id="noCompInRoomCol" prefWidth="75.0" text="Liczba maszyn" />
+                                    <TableColumn fx:id="progressRoomCol" prefWidth="75.0" text="Status " />
+                                 </columns>
+                                 <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                 </columnResizePolicy>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                                 <opaqueInsets>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </opaqueInsets>
+                              </TableView>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </VBox>
+               </content>
+               <tooltip>
+                  <Tooltip text="Panel w którym mamy dostep do maszyn" />
+               </tooltip>
+            </Tab>
+            <Tab text="Komputery">
               <content>
                   <VBox maxHeight="1.7976931348623157E308" prefHeight="629.0" prefWidth="901.0">
                      <children>
                       <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="286.0" prefWidth="885.0" style="-fx-background-color: transparent;">
                            <children>
-                              <TableView fx:id="table" editable="true" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="257.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="2.0">
+                              <TableView fx:id="table" editable="true" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="250.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
                                 <columns>
                                     <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                   <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
@@ -108,6 +139,9 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TableView>
+                              <ComboBox fx:id="cbSala" layoutX="343.0" layoutY="14.0" onAction="#salaSelect" prefHeight="25.0" prefWidth="228.0" AnchorPane.leftAnchor="343.0" AnchorPane.topAnchor="14.0" />
+                              <Label layoutX="183.0" layoutY="18.0" prefHeight="17.0" prefWidth="120.0" text="Sala labortoryjna:" AnchorPane.leftAnchor="183.0" AnchorPane.topAnchor="18.0" />
+                              <CheckBox fx:id="chkSelectAll" layoutX="74.0" layoutY="18.0" mnemonicParsing="false" onAction="#selectAllComputers" selected="true" text="Wszystkie" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="18.0" />
                            </children>
                         </AnchorPane>
                         <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="523.0" prefWidth="901.0">
@@ -149,7 +183,7 @@
                   <Tooltip text="Panel w którym mamy dostep do maszyn" />
                </tooltip>
             </Tab>
-          <Tab disable="true" text="Ustawienia">
+          <Tab text="Ustawienia">
                <content>
                   <VBox prefHeight="193.0" prefWidth="306.0" spacing="10.0" style="-fx-alignment: TOP_CENTER;">
                      <opaqueInsets>
@@ -159,9 +193,15 @@
                         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                      </padding>
                      <children>
-                        <CheckBox mnemonicParsing="false" text="CheckBox" />
-                        <Label lineSpacing="10.0" prefHeight="17.0" prefWidth="135.0" style="-fx-alignment: CENTER;" text="Label" textAlignment="CENTER" />
-                        <Button lineSpacing="11.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="134.0" text="Button" />
+                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Label layoutX="133.0" layoutY="6.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="256.0" style="-fx-alignment: CENTER;" text="Maksymalny czas dla zadania SSH:" textAlignment="JUSTIFY" wrapText="true" />
+                              <Label layoutX="133.0" layoutY="39.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="256.0" style="-fx-alignment: CENTER;" text="Maksymalny czas dla zadania SUDO:" textAlignment="JUSTIFY" wrapText="true" />
+                              <TextField fx:id="txtSshTm" layoutX="389.0" layoutY="2.0" onAction="#sshTmChanged" onInputMethodTextChanged="#sshTmChanged" />
+                              <TextField fx:id="txtSudoTm" layoutX="389.0" layoutY="35.0" onAction="#sudoTmChanged" onInputMethodTextChanged="#sshTmChanged" />
+                              <Button layoutX="423.0" layoutY="75.0" mnemonicParsing="false" onAction="#saveSettings" prefHeight="25.0" prefWidth="122.0" text="Zapisz zmiany" />
+                           </children>
+                        </AnchorPane>
                      </children>
                   </VBox>
                </content>

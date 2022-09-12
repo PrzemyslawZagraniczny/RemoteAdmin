@@ -13,6 +13,7 @@ module com.praca.remoteadmin {
     requires jsch;
     requires org.junit.jupiter.api;
     requires log4j;
+    requires com.fasterxml.jackson.databind;
 
     opens com.praca.remoteadmin to javafx.fxml;
     exports com.praca.remoteadmin;
@@ -24,4 +25,6 @@ module com.praca.remoteadmin {
     opens com.praca.remoteadmin.Brudnopis to javafx.fxml;
     exports com.praca.remoteadmin.GUI;
     opens com.praca.remoteadmin.GUI to javafx.fxml;
+    exports com.praca.remoteadmin.Utils;
+    opens com.praca.remoteadmin.Utils to javafx.fxml;
 }

@@ -32,7 +32,6 @@ public class MainApplication extends Application {
     public void stop(){
         ConnectionHelper.log.info("App successfully closed.");
         ConnectionHelper.log.info("************************");
-        // Save file
     }
     public static void main(String[] args) throws FileNotFoundException {
 

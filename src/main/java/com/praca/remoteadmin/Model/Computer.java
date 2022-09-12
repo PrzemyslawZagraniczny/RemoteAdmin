@@ -1,6 +1,7 @@
 package com.praca.remoteadmin.Model;
 
 import com.praca.remoteadmin.Connection.ConnectionHelper;
+import com.praca.remoteadmin.Utils.ExitStatusMapper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -26,12 +27,12 @@ public class Computer {
         this.status.set(status);
     }
 
-    private SimpleStringProperty  status = new SimpleStringProperty();
+    private SimpleStringProperty  status = new SimpleStringProperty(StatusType.UNKNOWN+"");
     //stan maszyny (czy jest włączona (ACTIVE), nieaktywna (OFFLINE)
     private StatusType stat = StatusType.UNKNOWN;
     //czy maszyna zostala wybrana do poczenia (ustawiane checkboxem)
     private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
-    private SimpleIntegerProperty cmdExitStatus = new SimpleIntegerProperty(-1);
+    private SimpleStringProperty cmdExitStatus = new SimpleStringProperty("");
 
     public double getProgressStatus() {
         return progressStatus.get();
@@ -47,28 +48,28 @@ public class Computer {
 
     private SimpleDoubleProperty progressStatus = new SimpleDoubleProperty(0);
 
-    public int getCmdExitStatus() {
+    public String getCmdExitStatus() {
         return cmdExitStatus.get();
     }
 
-    public SimpleIntegerProperty cmdExitStatusProperty() {
+    public SimpleStringProperty cmdExitStatusProperty() {
         return cmdExitStatus;
     }
 
     public void setCmdExitStatus(int cmdExitStatus) {
-        this.cmdExitStatus.set(cmdExitStatus);
+        this.cmdExitStatus.set(ExitStatusMapper.fromExitCode(cmdExitStatus) +" ("+ cmdExitStatus+")");
 
         if (EventQueue.isDispatchThread()) {
         } else {
 
             if(cmdExitStatus != 0) {
-                Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Uwaga!");
-                    alert.setHeaderText(getAddress());
-                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<" + cmdExitStatus + ">>");
-                    alert.show();
-                });
+//                Platform.runLater(() -> {
+//                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+//                    alert.setTitle("Uwaga!");
+//                    alert.setHeaderText(getAddress());
+//                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<" + cmdExitStatus + ">>");
+//                    alert.show();
+//                });
             }
 
         }

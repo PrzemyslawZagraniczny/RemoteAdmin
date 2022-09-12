@@ -1,5 +1,13 @@
 # RemoteAdmin
 Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zdalnej synchronizachi poleceń na wielu stacjach roboczych.
+## wersja beta 1.0.0
+<li>Program przydziela komputery do pracowni (aktualny plik danych - <b><i>data.json</i></b>).</li>
+<li>Ustawienia maksymalnych czasów w zakładce ustawienia.</li>
+<li>Dodana obsługa komendy <b><i>SUDO</b></i>.</li>
+<li>Usunięcie drobnych błędów.</li>
+<li>Dodana mnemoniczna lista błędów (opis znaczenia liczbowych wartości zakończenia operacji ExitStatus).</li>
+<li><i>Program w niektórych konfiguracjach ma tendencję do "wieszania się", nie odblokowuje przyczisku >> oraz nie pokazuje progresu obok komputera. Faktycznie jednak po maksymalnym czasie ustawionym dla operacji przycisk się odblokowuje.</i></li>
+
 ## wersja beta 0.9.3
 Poprawki w pliku POM.xml
 ## wersja beta 0.9.2

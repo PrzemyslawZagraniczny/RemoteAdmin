@@ -3,6 +3,11 @@ package com.praca.remoteadmin.Connection;
 import com.jcraft.jsch.*;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
+import javafx.scene.Node;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.PasswordField;
+import javafx.scene.layout.GridPane;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Optional;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
@@ -29,6 +35,7 @@ public class SSH2Connector implements IGenericConnector{
     private ConsoleCaptureOutput out = null;
     private OutputStream err = null;
     private CountDownLatch latch = null;
+    private static String sudo_pass = "";
 
 
     @Override
@@ -53,17 +60,18 @@ public class SSH2Connector implements IGenericConnector{
         UserInfo ui=new SSHUserInfo();
         session.setUserInfo(ui);
 
-        TimerTask tt = new TimerHelper(ConnectionHelper.shhConnectionTimeOut);
+        TimerTask tt = new TimerHelper(ConnectionHelper.sshConnectionTimeOut);
         java.util.Timer tim = new java.util.Timer();
         tim.schedule(tt, 0,1000);
 
         try {
-            session.setTimeout(ConnectionHelper.shhConnectionTimeOut);
+            session.setTimeout(ConnectionHelper.sshConnectionTimeOut);
             session.connect();
         } catch (JSchException e) {
             tim.cancel();
             computer.setStat(StatusType.OFFLINE);
             computer.setProgressStatus(0);
+            computer.setCmdExitStatus(-1);
             ConnectionHelper.log.error("Connection with <<" + comp.getAddress()+">> failed!");
             ConnectionHelper.log.error(e.getMessage());
             try {
@@ -111,20 +119,112 @@ public class SSH2Connector implements IGenericConnector{
     public void execCommand(String cmd) {
         new Thread(() -> exec(cmd)).start();
     }
+    public void setSudoPassword1(){
+        //aby nie powtarzać dla każdej maszyny
+        synchronized (sudo_pass) {
+            if (sudo_pass.length() > 0)
+                return;
 
+            JTextField passwordField = (JTextField) new JPasswordField(8);
+            Object[] ob = {passwordField};
+            int result =
+                    JOptionPane.showConfirmDialog(null,
+                            ob,
+                            "Enter password for sudo",
+                            JOptionPane.OK_CANCEL_OPTION);
+            if (result != JOptionPane.OK_OPTION) {
+                System.exit(-1);
+                return;
+            }
+            sudo_pass = passwordField.getText();
+        }
+    }
+    public static synchronized String setSudoPassword(){
+        //aby nie powtarzać dla każdej maszyny
+        synchronized (sudo_pass) {
+            if (sudo_pass.length() > 0)
+                return null;
+
+            javafx.scene.control.Dialog<String> dialog = new Dialog<>();
+            dialog.setTitle("RemoteAdmin");
+            dialog.setHeaderText("Podaj hasło dla komendy <<sudo>>");
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK);
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new javafx.geometry.Insets(20, 150, 10, 10));
+
+            PasswordField password = new PasswordField();
+            password.setPromptText("Hasło");
+            grid.add(new javafx.scene.control.Label("Hasło:"), 0, 1);
+
+            grid.add(password, 1, 1);
+
+            Node okButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.setDisable(true);
+
+            password.textProperty().addListener((observable, oldValue, newValue) -> {
+                okButton.setDisable(newValue.trim().isEmpty());
+            });
+
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(btn -> password.getText());
+
+
+
+//            TextInputDialog dialog = new TextInputDialog("");
+//            dialog.setTitle("RemoteAdmin");
+//
+//            dialog.setHeaderText("SUDO");
+//            dialog.setContentText("Podaj hasło dla komendy <<sudo>>");
+//
+
+            Optional<String> result = dialog.showAndWait();
+
+            if (result.isPresent()){
+                sudo_pass = result.get();
+                return sudo_pass;
+            }
+            else
+                return null;
+            //result.ifPresent(pass -> sudo_pass = pass);
+
+        }
+
+    }
     private void exec(String cmd) {
-        try {
-            channel=session.openChannel("exec");
-            ((ChannelExec)channel).setCommand(cmd);
-            channel.setInputStream(null);
-            ((ChannelExec)channel).setErrStream(err);
-//            ((ChannelExec)channel).setOutputStream(out);
-            InputStream in=channel.getInputStream();
-            this.out.writeAll(">"+cmd+System.lineSeparator());
+        boolean bUnInterrupted = true;
 
-            channel.connect();
+        try {
+            //if(channel == null || channel.isClosed())
+            {
+                //resetuj progres przed kolejnym zadaniem
+                computer.setProgressStatus(0);
+                channel = session.openChannel("exec");
+                channel.setInputStream(System.in);
+                //channel.setInputStream(null);
+            }
+            ((ChannelExec) channel).setErrStream(err);
+            int timeOut = ConnectionHelper.sshConnectionTimeOut;
+            if(!checkIfSudoCommand(cmd)) {
+                ((ChannelExec) channel).setCommand(cmd);
+                ((ChannelExec) channel).setErrStream(err,false);
+                ((ChannelExec)channel).setOutputStream(out);
+                channel.connect(timeOut);
+             }
+            else {
+                timeOut = ConnectionHelper.sudoConnectionTimeOut;
+            }
+            InputStream in = channel.getInputStream();
+
+            this.out.writeAll(">" + cmd + System.lineSeparator());
+
+
             byte[] tmp=new byte[1024];
-            while(true){
+            final int sleepTm = 100;
+            int cntr = timeOut/sleepTm;
+            while(bUnInterrupted){
                 while(in.available()>0){
                     int i=in.read(tmp, 0, 1024);
                     if(i<0)break;
@@ -140,23 +240,87 @@ public class SSH2Connector implements IGenericConnector{
                     latch.countDown();
                     break;
                 }
-                try{Thread.sleep(100);}catch(Exception ee){
-                    ConnectionHelper.log.error(ee.getMessage());
-                    //ee.printStackTrace();
-                    Thread.currentThread().interrupt();
+                cntr --;
+
+                if(cntr <= 0) {
+                    latch.countDown();
+                    ConnectionHelper.log.error("RemoteAdmin application timeout exception exceeded. Change application settings");
+                    computer.setCmdExitStatus(110);
+                    return;
                 }
+
+                Thread.sleep(sleepTm);
+                computer.setProgressStatus(computer.getProgressStatus() + sleepTm/(double)timeOut);
+
             }
         }catch (NullPointerException e) {
-            //TODO: jakiś bardziej czytelny komunikat może
+            System.err.println(e.getMessage());
+            ConnectionHelper.log.error(e.getMessage());
+            latch.countDown();
+            bUnInterrupted = false;
+        } catch (JSchException e) {
+            ConnectionHelper.log.error(e.getMessage());
+            System.err.println(e.getMessage());
+            latch.countDown();
+            bUnInterrupted = false;
+            //Thread.currentThread().interrupt();
+        } catch (IOException e) {
+            ConnectionHelper.log.error(e.getMessage());
+            System.err.println(e.getMessage());
+            latch.countDown();
+            bUnInterrupted = false;
+        } catch (InterruptedException e) {
+            ConnectionHelper.log.error(e.getMessage());
+            System.err.println(e.getMessage());
+            latch.countDown();
+            bUnInterrupted = false;
+        } finally {
+            //session.disconnect();
+            computer.setCmdExitStatus(channel.getExitStatus());
+            channel = null;
+
+        }
+    }
+
+    //sprawdz czy to jest komenda sudo
+    private boolean checkIfSudoCommand(String cmd) {
+
+
+        boolean bRet = false;
+        cmd = cmd.trim();
+
+        //jeśli zdefinoowano lokalny program typu sudo to wzorzec "zostawi go w spokoju"
+        Pattern pattern = Pattern.compile("^(usr/bin/sudo |sudo )(.*)");
+        Matcher match = pattern.matcher(cmd);
+        if(match.find())
+        {
+            if(match.groupCount() != 2) {
+                ConnectionHelper.log.error("Nie rozpoznane polecenie typu SUDO.");
+            }
+            else
+                cmd = match.group(2);
+            bRet = true;
+        }
+        else
+            return false;
+        ((ChannelExec)channel).setErrStream(System.err, false);
+        ((ChannelExec)channel).setCommand("sudo -S -p '' "+cmd);
+        OutputStream out= null;
+
+        try {
+            InputStream in = channel.getInputStream();
+            out = channel.getOutputStream();
+
+            channel.connect(ConnectionHelper.sudoConnectionTimeOut);
+            out.write((sudo_pass+"\n").getBytes());
+            out.flush();
+        } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
         } catch (JSchException e) {
             ConnectionHelper.log.error(e.getMessage());
-            Thread.currentThread().interrupt();
-        } catch (IOException e) {
-            ConnectionHelper.log.error(e.getMessage());
-        }finally {
-            channel.disconnect();
         }
+
+        return bRet;
     }
 
     @Override
@@ -263,17 +427,6 @@ public class SSH2Connector implements IGenericConnector{
         public boolean promptPassword(String message){
             passwd = sPassword;
             return true;
-//            Object[] ob={passwordField};
-//            int result=
-//                    JOptionPane.showConfirmDialog(null, ob, message,
-//                            JOptionPane.OK_CANCEL_OPTION);
-//            if(result==JOptionPane.OK_OPTION){
-//                passwd=passwordField.getText();
-//                return true;
-//            }
-//            else{
-//                return false;
-//            }
         }
         public void showMessage(String message){
             JOptionPane.showMessageDialog(null, message);
