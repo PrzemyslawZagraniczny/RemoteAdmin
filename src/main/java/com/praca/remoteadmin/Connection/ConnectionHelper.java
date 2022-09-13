@@ -8,6 +8,7 @@ import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.LabRoom;
 import com.praca.remoteadmin.Model.StatusType;
 import com.praca.remoteadmin.Utils.DataFormatEnum;
+import com.praca.remoteadmin.Utils.DataLoaderFactory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.log4j.Logger;
@@ -50,57 +51,6 @@ public class ConnectionHelper {
     public static synchronized ObservableList<LabRoom> loadData(DataFormatEnum df) {
         if(data != null) return data;
 
-
-        switch(df) {
-
-            case JSON:
-                ObjectMapper mapper = new ObjectMapper();
-
-                // Read JSON file and convert to java object
-                InputStream fileInputStream = null;
-                try {
-                    fileInputStream = new FileInputStream("data.json");
-                    LabRoom []sale = mapper.readValue(fileInputStream, LabRoom[].class);
-                    data = FXCollections.observableArrayList(sale);
-                    fileInputStream.close();
-                } catch (FileNotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (JsonMappingException e) {
-                    throw new RuntimeException(e);
-                } catch (JsonParseException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                break;
-            case TXT:
-            default:
-                data = FXCollections.observableArrayList();
-                try {
-                    List<String> list;
-
-                    try {
-                        list = Files.readAllLines(new File("workstations.txt").toPath());
-                    } catch (IOException ex) {
-                        return data;
-                    }
-                    int i = 1;
-                    for (String address : list) {
-                        //TODO: w przyszłości plik utworzyć jako csv i zapisać więcej wartości (np. nazwe stacji albo sali)
-                        address = address.trim();
-                        if (address.length() < 1) continue;
-                        //ignoruj linie zaczynające się od znaku #
-                        if (address.startsWith("#")) continue;
-                        LabRoom sala = new LabRoom();
-                        sala.getComputers().add(new Computer("Komputer " + i, address, StatusType.UNKNOWN));
-                        data = FXCollections.observableArrayList(sala);
-                        i++;
-                    }
-
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-        }
-        return data;
+        return DataLoaderFactory.loadData(df);
     }
 }

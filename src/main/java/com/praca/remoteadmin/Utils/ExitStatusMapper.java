@@ -28,7 +28,10 @@ public class ExitStatusMapper {
     public static String fromExitCode(int code) {
         if(exitStatusMap.containsKey(code))
             return exitStatusMap.get(code);
-        else
+        else {
+            if(code < 0)
+                return exitStatusMap.get(-1);
+        }
             return "Nieznany kod";
     }
 

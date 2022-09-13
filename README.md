@@ -1,5 +1,13 @@
 # RemoteAdmin
 Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zdalnej synchronizachi poleceń na wielu stacjach roboczych.
+## wersja 1.0.3
+Artefakt w out/artifacts/RemoteAdmin_jar/RemoteAdmin.jar
+Komenda uruchomienia JARa:
+<p>
+<i>java --module-path <b>/snap/openjfx/current/sdk/lib/</b> --add-modules javafx.controls,javafx.base,javafx.fxml -jar RemoteAdmin.jar</i>
+</p>
+gdzie ścieżka: <b>/snap/openjfx/current/sdk/lib/</b>
+oznaca ścieżkę do bibliotek javaFX (<i>javafx.controls.jar, javafx.base.jar i javafx.fxml.jar</i>)w systemie 
 ## wersja 1.0.2
 Artefakt w out/artifacts/RemoteAdmin_jar/RemoteAdmin.jar
 

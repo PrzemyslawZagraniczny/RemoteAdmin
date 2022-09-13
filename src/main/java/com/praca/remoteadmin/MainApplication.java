@@ -37,13 +37,18 @@ public class MainApplication extends Application {
 
         //TODO: Usuń w wersji finalnej!!!!
         //wczytuje dane z pliku (TYMCZASOWO)
-        FileInputStream fis=new FileInputStream("pass.txt");
-        Scanner s=new Scanner(fis);
-        if(s.hasNextLine())
-            ConnectionHelper.defaultLogin = s.nextLine().trim();
-        if(s.hasNextLine())
-            ConnectionHelper.defaultPassword = s.nextLine().trim();
-        s.close();
+        try {
+            FileInputStream fis=new FileInputStream("pass.txt");
+            Scanner s=new Scanner(fis);
+            if(s.hasNextLine())
+                ConnectionHelper.defaultLogin = s.nextLine().trim();
+            if(s.hasNextLine())
+                ConnectionHelper.defaultPassword = s.nextLine().trim();
+            s.close();
+        }
+        catch (FileNotFoundException e) {
+            //nie rób nic, brak pliku pozostawia pola puste
+        }
         launch();
     }
 }
