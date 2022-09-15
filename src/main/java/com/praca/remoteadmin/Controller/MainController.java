@@ -1,7 +1,9 @@
 package com.praca.remoteadmin.Controller;
 
+import com.jcraft.jsch.JSchException;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
+import com.praca.remoteadmin.Connection.IGenericConnector;
 import com.praca.remoteadmin.Connection.SSH2Connector;
 import com.praca.remoteadmin.GUI.MessageBoxTask;
 import com.praca.remoteadmin.Model.CmdType;
@@ -188,28 +190,30 @@ public class MainController {
         if(checkIfSudoCommand(cmd)) {
 
             SSH2Connector.setSudoPassword();
-
-//            final FutureTask query = new FutureTask(new Callable() {
-//                @Override
-//                public Object call() throws Exception {
-//                    return SSH2Connector.setSudoPassword();
-//                }
-//            });
-//            //Platform.runLater(query);
-//            query.run();
-//
-//            try {
-//                if(query.get() != null)
-//                    System.out.println("Pass validated");
-//            } catch (InterruptedException e) {
-//                ConnectionHelper.log.error(e.getMessage());
-//            } catch (ExecutionException e) {
-//                ConnectionHelper.log.error(e.getMessage());
-//            }
-
+            getAdminPass();
         }
         execParallel(CmdType.SENDING_CMD);
     }
+
+    private void getAdminPass() {
+        final FutureTask query = new FutureTask(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                return SSH2Connector.setSudoPassword();
+            }
+        });
+        Platform.runLater(query);
+
+        try {
+            if(query.get() != null)
+                System.out.println("Pass validated");
+        } catch (InterruptedException e) {
+            ConnectionHelper.log.error(e.getMessage());
+        } catch (ExecutionException e) {
+            ConnectionHelper.log.error(e.getMessage());
+        }
+    }
+
 
     private boolean checkIfSudoCommand(String cmd) {
         if(Pattern.matches("^sudo.*", cmd) )
@@ -252,23 +256,6 @@ public class MainController {
                 Thread.currentThread().interrupt();
             }
 
-//        for(Future<Computer> future : futures){
-//            try {
-//                if(future.get().getCmdExitStatus() != 0) {
-//                    Alert alert = new Alert(Alert.AlertType.ERROR);
-//                    alert.setTitle("Uwaga!");
-//                    alert.setHeaderText(future.get().getAddress());
-//                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<"+future.get().getCmdExitStatus()+">>");
-//                    alert.show();
-//                }
-//
-//
-//            } catch (InterruptedException e) {
-//                Thread.currentThread().interrupt();
-//            } catch (ExecutionException e) {
-//                Thread.currentThread().interrupt();
-//            }
-//        }
             try {
                 latch.await();
             } catch (InterruptedException e) {
@@ -424,7 +411,7 @@ public class MainController {
 
         private String pass;
         private String login;
-        private SSH2Connector conn = null;
+        private IGenericConnector conn = null;
 
         private CmdType cmdType = CmdType.NONE;
 
@@ -442,14 +429,16 @@ public class MainController {
             this.login = login;
         }
 
-
-
         private void connect() {
             if(conn == null) {
                 conn = new SSH2Connector();
                 conn.setErrorStream(System.err);
                 conn.setOutputStream(new ConsoleCaptureOutput(consoleOutput));
-                boolean ret = conn.openConnection(login, pass,  this.comp);
+                try {
+                    boolean ret = conn.openConnection(login, pass,  this.comp);
+                } catch (JSchException e) {
+                    throw new RuntimeException(e);
+                }
                 latch.countDown();
             }
         }
@@ -481,19 +470,22 @@ public class MainController {
 
         //wysyłanie komendy na zdarzenie kliku na przycisk >>
         private synchronized boolean sndCommand() {
-            if(!comp.isSelected())
-                return true;
+            if(!comp.isSelected() || conn == null)
+                return false;
             try {
                 String cmd = cmdLine.getText().trim();
                 conn.execCommand(cmd, latch);
+                return true;
             } catch (Exception e) {
                 ConnectionHelper.log.error(e.getMessage());
-                Thread.currentThread().interrupt();
+                //Thread.currentThread().interrupt();
             }
             return false;
         }
 
         public void disconnect() {
+            if(!comp.isSelected() || conn == null)
+                return;
             conn.disconnect();
             latch.countDown();
         }

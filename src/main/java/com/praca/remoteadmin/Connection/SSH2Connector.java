@@ -49,7 +49,6 @@ public class SSH2Connector implements IGenericConnector{
         try {
             session = jsch.getSession(sLogin, comp.getAddress(), iPort);
         }catch (NullPointerException e) {
-            //TODO: jakiś bardziej czytelny komunikat może
             System.err.println(e.getMessage());
             ConnectionHelper.log.error(e.getMessage());
         } catch (JSchException e) {
@@ -60,12 +59,13 @@ public class SSH2Connector implements IGenericConnector{
         UserInfo ui=new SSHUserInfo();
         session.setUserInfo(ui);
 
+        //pętla do wypełniania progressbar tabelki w czasie nawiązywania połączenia
         TimerTask tt = new TimerHelper(ConnectionHelper.sshConnectionTimeOut);
         java.util.Timer tim = new java.util.Timer();
         tim.schedule(tt, 0,1000);
 
         try {
-            session.setTimeout(ConnectionHelper.sshConnectionTimeOut);
+            //session.setTimeout(ConnectionHelper.sshConnectionTimeOut);
             session.connect();
         } catch (JSchException e) {
             tim.cancel();
@@ -78,28 +78,35 @@ public class SSH2Connector implements IGenericConnector{
                 this.err.write( e.getMessage().getBytes(Charset.forName("UTF-8")));
             } catch (IOException ex) {
                 ConnectionHelper.log.error(e.getMessage());
-                throw new RuntimeException(ex);
+                //throw new RuntimeException(ex);
             }
             return false;
         }
         tim.cancel();
 
         try {
+
             if( !session.isConnected()) {
                 //TODO: zdefiniuj własny wyjątek
                 computer.setStat(StatusType.OFFLINE);
-                computer.setProgressStatus(0);
+                computer.setCmdExitStatus(-1);
+                //computer.setProgressStatus(0);
                 ConnectionHelper.log.error("Connection with <<" + comp.getAddress()+">> failed!");
                 //throw new ExceptionInInitializerError("Connection not established!");
             }
-            computer.setStat(StatusType.CONNECTED);
-            ConnectionHelper.log.info("Successfully connected with <<"+computer.getAddress()+">>");
-        }catch (NullPointerException e) {
-            //TODO: jakiś bardziej czytelny komunikat może
+            else { //połączenie udane
+                computer.setStat(StatusType.CONNECTED);
+                computer.setCmdExitStatus(0);
+                ConnectionHelper.log.info("Successfully connected with <<"+computer.getAddress()+">>");
+                return true;
+            }
+
+
+         }catch (NullPointerException e) {
             System.err.println(e.getMessage());
             ConnectionHelper.log.error("First call method <<openConnection>>");
             ConnectionHelper.log.error(e.getMessage());
-            return channel.isConnected();
+            return false;
         }
 
         return false;
@@ -115,10 +122,8 @@ public class SSH2Connector implements IGenericConnector{
         this.out = out;
     }
 
-    @Override
-    public void execCommand(String cmd) {
-        new Thread(() -> exec(cmd)).start();
-    }
+
+
     public void setSudoPassword1(){
         //aby nie powtarzać dla każdej maszyny
         synchronized (sudo_pass) {
@@ -337,10 +342,10 @@ public class SSH2Connector implements IGenericConnector{
             ConnectionHelper.log.error(e.getMessage());
         }
     }
-
+    @Override
     public void execCommand(String cmd, CountDownLatch latch) {
         this.latch = latch;
-        execCommand(cmd);
+        new Thread(() -> exec(cmd)).start();
     }
 
     public class SSHUserInfo implements UserInfo, UIKeyboardInteractive {
@@ -505,7 +510,7 @@ public class SSH2Connector implements IGenericConnector{
         public void run() {
             i += 1000;
             computer.setProgressStatus(i/maxTime);
-            System.out.println("Wartość: "+(i/maxTime));
+            //System.out.println("Wartość: "+(i/maxTime));
         }
     }
 }

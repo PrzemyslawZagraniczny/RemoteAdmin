@@ -8,6 +8,7 @@ Komenda uruchomienia JARa:
 </p>
 gdzie ścieżka: <b>/snap/openjfx/current/sdk/lib/</b>
 oznaca ścieżkę do bibliotek javaFX (<i>javafx.controls.jar, javafx.base.jar i javafx.fxml.jar</i>)w systemie 
+
 ## wersja 1.0.2
 Artefakt w out/artifacts/RemoteAdmin_jar/RemoteAdmin.jar
 
