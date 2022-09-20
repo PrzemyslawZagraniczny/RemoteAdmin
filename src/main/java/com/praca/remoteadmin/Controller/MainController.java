@@ -10,6 +10,7 @@ import com.praca.remoteadmin.Model.CmdType;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.LabRoom;
 import com.praca.remoteadmin.Model.StatusType;
+import com.praca.remoteadmin.Utils.HistoryLog;
 import com.praca.remoteadmin.Utils.Settings;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -34,7 +35,16 @@ public class MainController {
     @FXML
     public MenuItem btQuit;
 
-    //roomsPane
+    //settings Pane
+    @FXML
+    public CheckBox chkHistorySave;
+    @FXML
+    public TextField txtSudoTm;
+    @FXML
+    public TextField txtSshTm;
+
+
+    //rooms Pane
     @FXML
     public TableView<LabRoom> tableRooms;
     @FXML
@@ -49,7 +59,7 @@ public class MainController {
     public TableColumn<LabRoom,Double> progressRoomCol;
 
 
-    //computersPane
+    //computers Pane
     @FXML
     public CheckBox chkSelectAll;
     final Set<CommandCallable> sshSessions = new HashSet<CommandCallable>();
@@ -65,19 +75,20 @@ public class MainController {
     public TableColumn<Computer,Double> progressCol;
     @FXML
     public TableView<Computer> table;
+
+    //login Pane
     @FXML
     public PasswordField passwordField;
     @FXML
     public TextField loginField;
-    @FXML
-    public TextField txtSudoTm;
-    @FXML
-    public TextField txtSshTm;
+
 
     @FXML
     public ComboBox<LabRoom> cbSala;
+    @FXML
     public TextArea consoleOutput;
-    public TextField cmdLine;
+    @FXML
+    public ComboBox<String> cmdLine;
 
     public Button btConnect;
     public Button btnExecCmd;
@@ -101,12 +112,14 @@ public class MainController {
         Settings.loadSettings();
         txtSudoTm.setText(ConnectionHelper.sudoConnectionTimeOut+"");
         txtSshTm.setText(ConnectionHelper.sshConnectionTimeOut +"");
-
+        chkHistorySave.setSelected(ConnectionHelper.historySave);
+        HistoryLog.loadData(cmdLine);
 
         btnExecCmd.setDisable(true);
         tabPane.getSelectionModel().select(1);      //ustaw domyślnie drugą zakładkę na starcie
         consoleOutput.autosize();
-        cmdLine.setText(ConnectionHelper.defaultCommand);
+        //cmdLine.getItems().add(0,ConnectionHelper.defaultCommand);
+        cmdLine.getSelectionModel().select(-1);
         loginField.setText(ConnectionHelper.defaultLogin);
         passwordField.setText(ConnectionHelper.defaultPassword);
 
@@ -186,7 +199,8 @@ public class MainController {
         //        data.get(1).setStat(StatusType.ACTIVE);
         //        if( true) return;
         btnExecCmd.setDisable(true);
-        String cmd = cmdLine.getText().trim();
+        String cmd = cmdLine.getSelectionModel().getSelectedItem().trim();
+        cmdLine.getItems().add(0, cmd);
         if(checkIfSudoCommand(cmd)) {
 
             SSH2Connector.setSudoPassword();
@@ -333,7 +347,10 @@ public class MainController {
 
     //klik na przycisk "Czyść konsolę"
     public void onConsolClear(ActionEvent actionEvent) {
+
+        HistoryLog.addCommand(cmdLine,cmdLine.getSelectionModel().getSelectedItem());
         consoleOutput.clear();
+
     }
 
     //klik na przycisk "Połącz"
@@ -400,7 +417,21 @@ public class MainController {
     private void saveSettings() {
         ConnectionHelper.sudoConnectionTimeOut = Integer.parseInt(txtSudoTm.getText());
         ConnectionHelper.sshConnectionTimeOut = Integer.parseInt(txtSshTm.getText());
+        ConnectionHelper.historySave = chkHistorySave.isSelected();
         Settings.saveData();
+    }
+
+    public void addRoomAction(ActionEvent actionEvent) {
+    }
+
+    public void rmRoomAction(ActionEvent actionEvent) {
+    }
+
+    public void addCompAction(ActionEvent actionEvent) {
+    }
+
+    public void setHistorySave(ActionEvent actionEvent) {
+        saveSettings();
     }
 
     //TODO: klasę Callable do utworzenia połączenia
@@ -473,7 +504,7 @@ public class MainController {
             if(!comp.isSelected() || conn == null)
                 return false;
             try {
-                String cmd = cmdLine.getText().trim();
+                String cmd = cmdLine.getSelectionModel().getSelectedItem().trim();
                 conn.execCommand(cmd, latch);
                 return true;
             } catch (Exception e) {

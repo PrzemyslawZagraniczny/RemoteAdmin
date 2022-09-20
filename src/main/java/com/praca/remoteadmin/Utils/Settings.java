@@ -11,6 +11,15 @@ public class Settings implements Serializable {
 
     private Integer sshTm = 10000;      //10000 ms domyślnie
     private Integer sudoTm = 30000;      //10000 ms domyślnie
+    private Boolean historyOn = true;    //czy zapamiętywać historię poleceń
+
+    public Boolean getHistoryOn() {
+        return historyOn;
+    }
+
+    public void setHistoryOn(Boolean historyOn) {
+        this.historyOn = historyOn;
+    }
 
     public Settings() {}
 
@@ -28,7 +37,11 @@ public class Settings implements Serializable {
             Settings settings = objectMapper.readValue(fin, Settings.class);
             ConnectionHelper.sshConnectionTimeOut = settings.sshTm;
             ConnectionHelper.sudoConnectionTimeOut = settings.sudoTm;
+            ConnectionHelper.historySave = settings.historyOn;
+
+            fin.close();
         } catch (IOException e) {
+            ConnectionHelper.log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -38,9 +51,13 @@ public class Settings implements Serializable {
         InputStream fin = null;
 
         try {
+            File fout = new File("settings.json");
             Settings settings = new Settings(ConnectionHelper.sshConnectionTimeOut,ConnectionHelper.sudoConnectionTimeOut);
-            objectMapper.writeValue(new File("settings.json"), settings);
+            objectMapper.writeValue(fout, settings);
+            
+
         } catch (IOException e) {
+            ConnectionHelper.log.error(e.getMessage());
             throw new RuntimeException(e);
         }
 

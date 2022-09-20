@@ -83,7 +83,7 @@
                   </GridPane>
               </content>
             </Tab>
-            <Tab text="Sale">
+            <Tab text="Pracownie komputerowe">
                <content>
                   <VBox maxHeight="1.7976931348623157E308" prefHeight="629.0" prefWidth="901.0">
                      <children>
@@ -106,6 +106,8 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TableView>
+                              <Button fx:id="btnAddRoom" layoutX="14.0" layoutY="21.0" mnemonicParsing="false" onAction="#addRoomAction" text="+ Dodaj pracownię" />
+                              <Button fx:id="btnRmRoom" layoutX="158.0" layoutY="21.0" mnemonicParsing="false" onAction="#rmRoomAction" text="- Usuń pracownie" AnchorPane.leftAnchor="158.0" AnchorPane.topAnchor="21.0" />
                            </children>
                         </AnchorPane>
                      </children>
@@ -142,6 +144,7 @@
                               <ComboBox fx:id="cbSala" layoutX="343.0" layoutY="14.0" onAction="#salaSelect" prefHeight="25.0" prefWidth="228.0" AnchorPane.leftAnchor="343.0" AnchorPane.topAnchor="14.0" />
                               <Label layoutX="183.0" layoutY="18.0" prefHeight="17.0" prefWidth="120.0" text="Sala labortoryjna:" AnchorPane.leftAnchor="183.0" AnchorPane.topAnchor="18.0" />
                               <CheckBox fx:id="chkSelectAll" layoutX="74.0" layoutY="18.0" mnemonicParsing="false" onAction="#selectAllComputers" selected="true" text="Wszystkie" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="18.0" />
+                              <Button fx:id="btnAddComputers" layoutX="595.0" layoutY="14.0" mnemonicParsing="false" onAction="#addCompAction" text="+ Dodaj komputery" AnchorPane.leftAnchor="595.0" AnchorPane.topAnchor="14.0" />
                            </children>
                         </AnchorPane>
                         <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="523.0" prefWidth="901.0">
@@ -154,7 +157,6 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TextArea>
-                              <TextField fx:id="cmdLine" layoutX="164.0" layoutY="211.0" maxHeight="1.7976931348623157E308" minWidth="30.0" prefHeight="25.0" prefWidth="649.0" promptText="Wiersz poleceń" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="164.0" AnchorPane.rightAnchor="88.0" />
                               <Label layoutX="24.0" layoutY="215.0" prefHeight="17.0" prefWidth="127.0" text="Linia poleceń:" textAlignment="RIGHT" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="24.0" />
                               <Button fx:id="btnExecCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" layoutX="820.0" layoutY="211.0" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="32.0" />
                               <HBox alignment="TOP_RIGHT" layoutX="7.0" layoutY="108.0" prefHeight="31.0" prefWidth="868.0" AnchorPane.bottomAnchor="294.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="32.0">
@@ -174,6 +176,7 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </HBox>
+                              <ComboBox fx:id="cmdLine" editable="true" layoutX="107.0" layoutY="394.0" prefHeight="25.0" prefWidth="700.0" />
                            </children>
                         </AnchorPane>
                      </children>
@@ -199,7 +202,8 @@
                               <Label layoutX="133.0" layoutY="39.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="256.0" style="-fx-alignment: CENTER;" text="Maksymalny czas dla zadania SUDO:" textAlignment="JUSTIFY" wrapText="true" />
                               <TextField fx:id="txtSshTm" layoutX="389.0" layoutY="2.0" onAction="#sshTmChanged" onInputMethodTextChanged="#sshTmChanged" />
                               <TextField fx:id="txtSudoTm" layoutX="389.0" layoutY="35.0" onAction="#sudoTmChanged" onInputMethodTextChanged="#sshTmChanged" />
-                              <Button layoutX="423.0" layoutY="75.0" mnemonicParsing="false" onAction="#saveSettings" prefHeight="25.0" prefWidth="122.0" text="Zapisz zmiany" />
+                              <CheckBox fx:id="chkHistorySave" contentDisplay="RIGHT" graphicTextGap="11.0" layoutX="298.0" layoutY="73.0" mnemonicParsing="false" onAction="#setHistorySave" text="Zapamiętaj historię wpisywanych poleceń" AnchorPane.leftAnchor="298.0" AnchorPane.topAnchor="73.0" />
+                              <Button layoutX="416.0" layoutY="112.0" mnemonicParsing="false" onAction="#saveSettings" prefHeight="25.0" prefWidth="122.0" text="Zapisz zmiany" />
                            </children>
                         </AnchorPane>
                      </children>

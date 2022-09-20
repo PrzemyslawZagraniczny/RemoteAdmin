@@ -1,0 +1,6 @@
+ls
+ps -ax | grep ssh
+ls -al | more
+ll
+netstat
+ll

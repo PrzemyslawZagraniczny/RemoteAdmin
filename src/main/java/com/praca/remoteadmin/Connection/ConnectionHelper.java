@@ -32,6 +32,7 @@ public class ConnectionHelper {
     public static String defaultCommand = "sudo printenv SUDO_USER";//"set|grep SSH";//"ls -al";
     public static String defaultLogin = "";
     public static String defaultPassword = "";
+    public static boolean historySave = false;
 
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {

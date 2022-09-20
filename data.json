@@ -21,10 +21,6 @@
         "name": "Komputer 3",
         "address": "192.168.42.131"
       },
-      {
-        "name": "Komputer 4",
-        "address": "192.168.42.112"
-      },
 
       {
         "name": "Komputer 5",
@@ -32,5 +28,5 @@
       }
     ]
   }
-
 ]
+

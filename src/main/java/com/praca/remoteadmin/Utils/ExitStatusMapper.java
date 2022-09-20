@@ -1,5 +1,6 @@
 package com.praca.remoteadmin.Utils;
 
+import com.praca.remoteadmin.Connection.ConnectionHelper;
 import javafx.util.Pair;
 
 import java.io.File;
@@ -18,6 +19,7 @@ public class ExitStatusMapper {
         try {
             list = Files.readAllLines(new File("exitCodes.csv").toPath());
         } catch (IOException ex) {
+            ConnectionHelper.log.error(ex.getMessage());
         }
         for(String linia : list) {
             String []para = linia.split(";");
