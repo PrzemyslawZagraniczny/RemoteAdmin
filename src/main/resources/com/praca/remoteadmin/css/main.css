@@ -24,11 +24,23 @@ root {
 }
 
 partiallySelected {
-  -fx-font-size: 14px;
-  -fx-color: rgba(255,55,55,.5);
-  -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-color: rgba(255,55,55,.5);
+    -fx-font-weight: bold;
 }
+.table-view .table-column {
+    -fx-alignment: CENTER;
+}
+.table-view {
+    -fx-alignment: CENTER;
+    -fx-padding: 0.166667em; /* 2px, plus border adds 1px */
 
+    -fx-background-color: red;
+    -fx-border-color: transparent -fx-table-cell-border-color transparent transparent;
+    -fx-border-width: 0.083333em; /* 1 */
+    -fx-cell-size: 2.0em; /* 24 */
+    -fx-text-fill: -fx-text-inner-color;
+}
 #actiontarget {
   -fx-fill: rgba(255,255,255,1);
   -fx-font-weight: bold;

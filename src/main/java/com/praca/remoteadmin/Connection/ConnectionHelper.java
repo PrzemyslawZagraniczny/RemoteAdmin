@@ -33,6 +33,7 @@ public class ConnectionHelper {
     public static String defaultLogin = "";
     public static String defaultPassword = "";
     public static boolean historySave = false;
+    public static int mask[] = {127, 191, 256}  ;    //maski dla klas A, B, C
 
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {
@@ -53,5 +54,9 @@ public class ConnectionHelper {
         if(data != null) return data;
 
         return DataLoaderFactory.loadData(df);
+    }
+
+    public static void saveData(ObservableList<LabRoom> sale) {
+        DataLoaderFactory.saveData(sale);
     }
 }

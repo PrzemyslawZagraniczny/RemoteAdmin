@@ -35,7 +35,7 @@
                            <children>
                               <ScrollPane prefHeight="343.0" prefWidth="636.0">
                                  <content>
-                                    <TableView fx:id="table" prefHeight="340.0" prefWidth="634.0" style="-fx-background-color: transparent;">
+                                    <TableView fx:id="tabelka" prefHeight="340.0" prefWidth="634.0" style="-fx-background-color: transparent;">
                                       <columns>
                                           <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                         <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />

@@ -1,13 +1,9 @@
 package com.praca.remoteadmin.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Utils.ExitStatusMapper;
-import javafx.application.Platform;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 
 import java.awt.*;
 
@@ -27,11 +23,23 @@ public class Computer {
         this.status.set(status);
     }
 
+    public void setObserver(ISaveDataObserver observer) {
+        this.observer = observer;
+    }
+
+    @JsonIgnore
+    LabRoom parent = null;
+    @JsonIgnore
+    private ISaveDataObserver observer = null;
+    @JsonIgnore
     private SimpleStringProperty  status = new SimpleStringProperty(StatusType.UNKNOWN+"");
+    @JsonIgnore
     //stan maszyny (czy jest włączona (ACTIVE), nieaktywna (OFFLINE)
     private StatusType stat = StatusType.UNKNOWN;
+
     //czy maszyna zostala wybrana do poczenia (ustawiane checkboxem)
     private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
+    @JsonIgnore
     private SimpleStringProperty cmdExitStatus = new SimpleStringProperty("");
 
     public double getProgressStatus() {
@@ -46,6 +54,7 @@ public class Computer {
         this.progressStatus.set(progressStatus);
     }
 
+    @JsonIgnore
     private SimpleDoubleProperty progressStatus = new SimpleDoubleProperty(0);
 
     public String getCmdExitStatus() {
@@ -76,13 +85,36 @@ public class Computer {
     }
 
     public Computer() {
+        addSelectedListener();
+
     }
 
-    public Computer(String sName, String sAddress, StatusType stat) {
+    public Computer(LabRoom parent, String sName, String sAddress, StatusType stat) {
+        this.parent = parent;
+
         this.name.set(sName);
         this.address.set(sAddress);
         this.stat = stat;
         status.set(stat.toString());
+        addSelectedListener();
+    }
+
+    private void addSelectedListener() {
+        selected.addListener(observable -> {
+            if(observer != null) {
+                observer.saveData();
+            }
+
+            ConnectionHelper.log.info("User "+(selected.get() ?"selected":"unselected")+" host <<"+getAddress()+">>");
+        });
+        selected.addListener(change -> {
+            if(parent != null )
+                if(selected.get())
+                    parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get()+1);
+                else
+                    parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get()-1);
+            parent.computerStatusProperty().set(parent.numberOfComputersProperty().get()+"/"+parent.getComputers().size());
+        });
     }
 
     public String getName() {
@@ -119,6 +151,7 @@ public class Computer {
 
     public void setSelected(boolean selected) {
         this.selected.set(selected);
+
         ConnectionHelper.log.info("User "+(selected ?"selected":"unselected")+" host <<"+getAddress()+">>");
     }
 
@@ -130,5 +163,9 @@ public class Computer {
     public void setStat(StatusType stat) {
         this.stat = stat;
         status.set(stat.toString());
+    }
+
+    public void setParent(LabRoom labRoom) {
+        parent = labRoom;
     }
 }

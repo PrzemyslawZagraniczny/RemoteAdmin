@@ -3,6 +3,7 @@ package com.praca.remoteadmin.Utils;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.LabRoom;
 import com.praca.remoteadmin.Model.StatusType;
@@ -34,13 +35,17 @@ public class DataLoaderFactory {
                         fileInputStream.close();
                         break;
                     } catch (FileNotFoundException var9) {
+                        ConnectionHelper.log.error(var9);
                         throw new RuntimeException(var9);
                     } catch (JsonMappingException var10) {
                         throw new RuntimeException(var10);
                     } catch (JsonParseException var11) {
-                        throw new RuntimeException(var11);
+                        ConnectionHelper.log.error(var11);
+                        //throw new RuntimeException(var11);
                     } catch (IOException var12) {
+                        ConnectionHelper.log.error(var12);
                         throw new RuntimeException(var12);
+
                     }
                 case TXT:
                 default:
@@ -62,7 +67,7 @@ public class DataLoaderFactory {
                             address = address.trim();
                             if (address.length() >= 1 && !address.startsWith("#")) {
                                 LabRoom sala = new LabRoom();
-                                sala.getComputers().add(new Computer("Komputer " + i, address, StatusType.UNKNOWN));
+                                sala.getComputers().add(new Computer(sala, "Komputer " + i, address, StatusType.UNKNOWN));
                                 data = FXCollections.observableArrayList(new LabRoom[]{sala});
                                 ++i;
                             }
@@ -74,4 +79,20 @@ public class DataLoaderFactory {
 
             return data;
         }
+    public static void saveData(ObservableList<LabRoom> data) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+
+        try {
+            File fout = new File("data.json");
+            objectMapper.writeValue(fout, data);
+
+
+        } catch (IOException e) {
+            ConnectionHelper.log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+    }
+
 }

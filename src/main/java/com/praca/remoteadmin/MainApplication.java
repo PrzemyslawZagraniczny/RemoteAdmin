@@ -3,6 +3,7 @@ package com.praca.remoteadmin;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -16,7 +17,15 @@ public class MainApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("View/main1.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1024, 768);
+
+        Parent parent = fxmlLoader.load();
+        if(parent == null)
+        {
+            System.err.println("Błąd pliku FXML");
+            ConnectionHelper.log.info("Błąd pliku FXML");
+        }
+
+        Scene scene = new Scene(parent, 1024, 768);
         stage.setMinWidth(640);
         stage.setMinHeight(610);
         stage.setMaxHeight(768);

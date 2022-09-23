@@ -6,10 +6,8 @@ import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
 import com.praca.remoteadmin.Connection.IGenericConnector;
 import com.praca.remoteadmin.Connection.SSH2Connector;
 import com.praca.remoteadmin.GUI.MessageBoxTask;
-import com.praca.remoteadmin.Model.CmdType;
-import com.praca.remoteadmin.Model.Computer;
-import com.praca.remoteadmin.Model.LabRoom;
-import com.praca.remoteadmin.Model.StatusType;
+import com.praca.remoteadmin.Model.*;
+import com.praca.remoteadmin.Utils.AddComputersDialog;
 import com.praca.remoteadmin.Utils.HistoryLog;
 import com.praca.remoteadmin.Utils.Settings;
 import javafx.application.Platform;
@@ -23,15 +21,14 @@ import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.UnaryOperator;
 import java.util.regex.Pattern;
 
 import static com.praca.remoteadmin.Utils.DataFormatEnum.JSON;
 
-public class MainController {
+public class MainController implements ISaveDataObserver {
     @FXML
     public MenuItem btQuit;
 
@@ -54,9 +51,11 @@ public class MainController {
     @FXML
     public TableColumn<LabRoom, Boolean> selectRoomCol;
     @FXML
-    public TableColumn<LabRoom, Integer>  noCompInRoomCol;
+    public TableColumn<LabRoom, String>  noCompInRoomCol;
     @FXML
     public TableColumn<LabRoom,Double> progressRoomCol;
+    @FXML
+    public TextField txtNewLabRoom;
 
 
     //computers Pane
@@ -74,7 +73,10 @@ public class MainController {
     @FXML
     public TableColumn<Computer,Double> progressCol;
     @FXML
-    public TableView<Computer> table;
+    public TableView<Computer> tabelka;
+
+    @FXML
+    public Button btnRmComputers;
 
     //login Pane
     @FXML
@@ -110,6 +112,17 @@ public class MainController {
     @FXML
     public void initialize() {
         Settings.loadSettings();
+        //maska do wprowadzania tylko cyfr (1 - 1999999999)
+        final UnaryOperator<TextFormatter.Change> digitsOnlyFilter = c -> {
+            String text = c.getControlNewText();
+            if  (text.matches("[0-9]{0,7}")) {
+                return c ;
+            } else {
+                return null ;
+            }
+        };
+        txtSudoTm.setTextFormatter(new TextFormatter<>(digitsOnlyFilter));
+        txtSshTm.setTextFormatter(new TextFormatter<>(digitsOnlyFilter));
         txtSudoTm.setText(ConnectionHelper.sudoConnectionTimeOut+"");
         txtSshTm.setText(ConnectionHelper.sshConnectionTimeOut +"");
         chkHistorySave.setSelected(ConnectionHelper.historySave);
@@ -118,30 +131,21 @@ public class MainController {
         btnExecCmd.setDisable(true);
         tabPane.getSelectionModel().select(1);      //ustaw domyślnie drugą zakładkę na starcie
         consoleOutput.autosize();
-        //cmdLine.getItems().add(0,ConnectionHelper.defaultCommand);
-        cmdLine.getSelectionModel().select(-1);
+        cmdLine.getItems().add(0,ConnectionHelper.defaultCommand);
+        cmdLine.getSelectionModel().select(0);
         loginField.setText(ConnectionHelper.defaultLogin);
         passwordField.setText(ConnectionHelper.defaultPassword);
 
         //powiązanie kolumn tabelki z properties dla obiektu Computer
 
-        roomNameCol.setCellValueFactory( new PropertyValueFactory<LabRoom, String>("name"));
-        selectRoomCol.setCellValueFactory( new PropertyValueFactory<LabRoom, Boolean>("selected"));
-        noCompInRoomCol.setCellValueFactory( new PropertyValueFactory<LabRoom, Integer>("numberOfComputers"));
-        selectRoomCol.setCellFactory(
-                new Callback<TableColumn<LabRoom,Boolean>,TableCell<LabRoom,Boolean>>(){
-                    @Override public
-                    TableCell<LabRoom,Boolean> call( TableColumn<LabRoom,Boolean> p ){
-                        return new CheckBoxTableCell<>();
-                    }
-                });
+        roomNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        selectRoomCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        noCompInRoomCol.setCellValueFactory(new PropertyValueFactory<>("computerStatus"));
+        selectRoomCol.setCellFactory( p -> new CheckBoxTableCell<>());
 
-        statusCol.setCellValueFactory(
-                new PropertyValueFactory<Computer, String>("status")
-        );
-        addressCol.setCellValueFactory(
-                new PropertyValueFactory<>("address")
-        );
+        statusCol.setCellValueFactory( new PropertyValueFactory<>("status") );
+        addressCol.setCellValueFactory( new PropertyValueFactory<>("address") );
+        selectCol.setCellValueFactory(new PropertyValueFactory<>("selected") );
         selectCol.setCellFactory(
                 new Callback<TableColumn<Computer,Boolean>,TableCell<Computer,Boolean>>(){
                     @Override public
@@ -159,9 +163,7 @@ public class MainController {
 
 
 
-        selectCol.setCellValueFactory(
-                new PropertyValueFactory<>("selected")
-        );
+
         cmdStatCol.setCellValueFactory(
                 new PropertyValueFactory<>("cmdExitStatus")
         );
@@ -171,16 +173,29 @@ public class MainController {
 
 
         sale = ConnectionHelper.loadData(JSON);
+
         if(sale == null) {
             //TODO: błąd wczytania (do logera i na ekran)
             return;
         }
+        //dodaj observera do każdego elementu
+        for(LabRoom room : sale) {
+            room.setObserver(this);
+            for (Computer comp : room.getComputers()) {
+                comp.setObserver(this);
+            }
+        }
         cbSala.setItems(sale);
         cbSala.setEditable(false);
-        if (sale.size() > 0)
-            cbSala.getSelectionModel().select(sale.get(0));
+        if (sale.size() <= 0) return;
+
+        cbSala.getSelectionModel().select(sale.get(0));
         LabRoom room = sale.get(0);
-        table.getItems().addAll(room.getComputers());
+        if(room != null && room.getComputers() != null)
+            tabelka.getItems().addAll(room.getComputers());
+        else
+            System.err.println("Room == null!!");
+
         tableRooms.getItems().addAll(sale);
 
     }
@@ -348,7 +363,7 @@ public class MainController {
     //klik na przycisk "Czyść konsolę"
     public void onConsolClear(ActionEvent actionEvent) {
 
-        HistoryLog.addCommand(cmdLine,cmdLine.getSelectionModel().getSelectedItem());
+        //HistoryLog.addCommand(cmdLine,cmdLine.getSelectionModel().getSelectedItem());
         consoleOutput.clear();
 
     }
@@ -382,10 +397,16 @@ public class MainController {
 
     public void salaSelect(ActionEvent actionEvent) {
         int indx = cbSala.getSelectionModel().getSelectedIndex();
-        table.getItems().clear();
-        table.getItems().addAll(sale.get(indx).getComputers());
-        table.refresh();
+        tabelka.getItems().clear();
+        tabelka.getItems().addAll(sale.get(indx).getComputers());
+        tabelka.refresh();
     }
+    public void tableRoomsRefresh() {
+        tableRooms.getItems().clear();
+        tableRooms.getItems().addAll(sale);
+        tableRooms.refresh();
+    }
+
 
     public void selectAllComputers(ActionEvent actionEvent) {
         LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
@@ -422,16 +443,77 @@ public class MainController {
     }
 
     public void addRoomAction(ActionEvent actionEvent) {
+        String sName = txtNewLabRoom.getText().trim();
+        if(sName.length() <= 0) return;
+        sale.add(new LabRoom(sale.size()+1, sName));
+        saveData();
+        tableRoomsRefresh();
     }
 
     public void rmRoomAction(ActionEvent actionEvent) {
+        List<LabRoom> list = new ArrayList<>();
+
+        if(sale != null) {
+            for(LabRoom room : sale) {
+                if(room.isSelected())
+                    list.add(room);
+            }
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Uwaga!");
+        alert.setHeaderText("Poniższa komenda usunie <<"+(list.size())+">> pracowni wraz z ich komputerami!");
+        alert.setContentText("Kontynuować?");
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.isPresent()) {
+            if(result.get() == ButtonType.OK) {
+                sale.removeAll(list);
+                saveData();
+                tableRoomsRefresh();
+            }
+        }
     }
 
+    //"Dodaj komputery"
     public void addCompAction(ActionEvent actionEvent) {
+        AddComputersDialog dlg = new AddComputersDialog(sale.get(cbSala.getSelectionModel().getSelectedIndex()), this);
+        salaSelect(null);       //dla odświeżenia widoku tabelki
+
     }
 
     public void setHistorySave(ActionEvent actionEvent) {
         saveSettings();
+    }
+
+    //implementacja funkcji observera do aktualizacji pliku data.json
+    @Override
+    public boolean saveData() {
+        ConnectionHelper.saveData(sale);
+        return true;
+    }
+
+    //usuwa zaznaczone komputery w aktywnej sali
+    public void rmCompAction(ActionEvent actionEvent) {
+
+        LabRoom room = cbSala.getSelectionModel().getSelectedItem();
+        List<Computer> list = new ArrayList<>();
+        if(room != null) {
+            for(Computer c : room.getComputers()) {
+                if(!c.isSelected())
+                    list.add(c);
+            }
+        }
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Uwaga!");
+        alert.setHeaderText("Poniższa komenda usunie z pracowni <<"+(room.getComputers().size() - list.size())+">> komputerów.");
+        alert.setContentText("Kontynuować?");
+        Optional<ButtonType> result = alert.showAndWait();
+        if(result.isPresent()) {
+            if(result.get() == ButtonType.OK) {
+                room.setComputers(list);
+                saveData();
+                salaSelect(null);
+            }
+        }
     }
 
     //TODO: klasę Callable do utworzenia połączenia

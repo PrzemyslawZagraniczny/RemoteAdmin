@@ -28,7 +28,7 @@
 
 <VBox prefHeight="800.0" prefWidth="901.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
   <children>
-    <MenuBar VBox.vgrow="NEVER">
+    <MenuBar prefHeight="25.0" prefWidth="994.0" VBox.vgrow="NEVER">
       <menus>
         <Menu mnemonicParsing="false" text="Opcje">
           <items>
@@ -45,7 +45,7 @@
         </Menu>
       </menus>
     </MenuBar>
-      <TabPane fx:id="tabPane" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" prefHeight="774.0" prefWidth="901.0" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <Tab text="Logowanie">
               <content>
@@ -87,9 +87,9 @@
                <content>
                   <VBox maxHeight="1.7976931348623157E308" prefHeight="629.0" prefWidth="901.0">
                      <children>
-                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="286.0" prefWidth="885.0" style="-fx-background-color: transparent;">
+                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="635.0" prefWidth="901.0" style="-fx-background-color: transparent;">
                            <children>
-                              <TableView fx:id="tableRooms" editable="true" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="448.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-208.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
+                              <TableView fx:id="tableRooms" editable="true" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="346.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-106.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
                                  <columns>
                                     <TableColumn fx:id="selectRoomCol" prefWidth="75.0" text="Zaznacz" />
                                     <TableColumn fx:id="roomNameCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Sala" />
@@ -106,8 +106,9 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TableView>
-                              <Button fx:id="btnAddRoom" layoutX="14.0" layoutY="21.0" mnemonicParsing="false" onAction="#addRoomAction" text="+ Dodaj pracownię" />
-                              <Button fx:id="btnRmRoom" layoutX="158.0" layoutY="21.0" mnemonicParsing="false" onAction="#rmRoomAction" text="- Usuń pracownie" AnchorPane.leftAnchor="158.0" AnchorPane.topAnchor="21.0" />
+                              <Button fx:id="btnAddRoom" layoutX="324.0" layoutY="21.0" mnemonicParsing="false" onAction="#addRoomAction" text="(+) Dodaj pracownię" />
+                              <Button fx:id="btnRmRoom" layoutX="468.0" layoutY="21.0" mnemonicParsing="false" onAction="#rmRoomAction" text="(-) Usuń zaznaczone pracownie" AnchorPane.leftAnchor="468.0" AnchorPane.topAnchor="21.0" />
+                              <TextField fx:id="txtNewLabRoom" layoutX="14.0" layoutY="21.0" prefHeight="25.0" prefWidth="297.0" promptText="Nazwa pracowni" />
                            </children>
                         </AnchorPane>
                      </children>
@@ -121,9 +122,14 @@
               <content>
                   <VBox maxHeight="1.7976931348623157E308" prefHeight="629.0" prefWidth="901.0">
                      <children>
-                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="286.0" prefWidth="885.0" style="-fx-background-color: transparent;">
+                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="411.0" prefWidth="901.0" style="-fx-background-color: transparent;">
                            <children>
-                              <TableView fx:id="table" editable="true" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="250.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
+                              <ComboBox fx:id="cbSala" layoutX="303.0" layoutY="14.0" onAction="#salaSelect" prefHeight="25.0" prefWidth="228.0" AnchorPane.leftAnchor="303.0" AnchorPane.topAnchor="14.0" />
+                              <Label layoutX="183.0" layoutY="18.0" prefHeight="17.0" prefWidth="120.0" text="Sala labortoryjna:" AnchorPane.leftAnchor="183.0" AnchorPane.topAnchor="18.0" />
+                              <CheckBox fx:id="chkSelectAll" layoutX="74.0" layoutY="18.0" mnemonicParsing="false" onAction="#selectAllComputers" selected="true" text="Wszystkie" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="18.0" />
+                              <Button fx:id="btnAddComputers" layoutX="555.0" layoutY="14.0" mnemonicParsing="false" onAction="#addCompAction" text="(+) Dodaj komputery" AnchorPane.leftAnchor="555.0" AnchorPane.topAnchor="14.0" />
+                              <Button fx:id="btnRmComputers" layoutX="689.0" layoutY="14.0" mnemonicParsing="false" onAction="#rmCompAction" text="(-) Usuń zaznaczone komputery" />
+                              <TableView fx:id="tabelka" editable="true" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="150.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
                                 <columns>
                                     <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                   <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
@@ -141,13 +147,9 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TableView>
-                              <ComboBox fx:id="cbSala" layoutX="343.0" layoutY="14.0" onAction="#salaSelect" prefHeight="25.0" prefWidth="228.0" AnchorPane.leftAnchor="343.0" AnchorPane.topAnchor="14.0" />
-                              <Label layoutX="183.0" layoutY="18.0" prefHeight="17.0" prefWidth="120.0" text="Sala labortoryjna:" AnchorPane.leftAnchor="183.0" AnchorPane.topAnchor="18.0" />
-                              <CheckBox fx:id="chkSelectAll" layoutX="74.0" layoutY="18.0" mnemonicParsing="false" onAction="#selectAllComputers" selected="true" text="Wszystkie" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="18.0" />
-                              <Button fx:id="btnAddComputers" layoutX="595.0" layoutY="14.0" mnemonicParsing="false" onAction="#addCompAction" text="+ Dodaj komputery" AnchorPane.leftAnchor="595.0" AnchorPane.topAnchor="14.0" />
                            </children>
                         </AnchorPane>
-                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="523.0" prefWidth="901.0">
+                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="345.0" prefWidth="901.0">
                            <children>
                               <TextArea fx:id="consoleOutput" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" prefHeight="242.0" prefWidth="861.0" scrollLeft="11.0" scrollTop="11.0" wrapText="true" AnchorPane.bottomAnchor="46.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0">
                                  <padding>
@@ -176,7 +178,7 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </HBox>
-                              <ComboBox fx:id="cmdLine" editable="true" layoutX="107.0" layoutY="394.0" prefHeight="25.0" prefWidth="700.0" />
+                              <ComboBox fx:id="cmdLine" editable="true" layoutX="110.0" layoutY="391.0" prefHeight="25.0" prefWidth="700.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="91.0" />
                            </children>
                         </AnchorPane>
                      </children>

@@ -91,7 +91,7 @@
                      <children>
                       <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="286.0" prefWidth="885.0" style="-fx-background-color: transparent;">
                            <children>
-                              <TableView fx:id="table" editable="true" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="257.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="2.0">
+                              <TableView fx:id="tabelka" editable="true" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="257.0" prefWidth="881.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="-65.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="2.0">
                                 <columns>
                                     <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                   <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
