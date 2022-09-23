@@ -5,6 +5,7 @@ Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zd
 <li>dodawanie komputerów/pracowni</li>
 <li>zapisywanie zmian w pliku data.json</li>
 <li>walidacja wartości wpisywanych do pól edycji (filtrowanie)</li>
+<li>Wyjustowany, wyrównany i poprawiony GUI</li>
 <li>sporo drobnych poprawek</li>
 <li>aktualizacja statusu maszyn w tabelce 'Pracownie komputerowe'</li>
 <li>dodanie zapisu historii poleceń</li>

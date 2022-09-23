@@ -108,12 +108,13 @@ public class Computer {
             ConnectionHelper.log.info("User "+(selected.get() ?"selected":"unselected")+" host <<"+getAddress()+">>");
         });
         selected.addListener(change -> {
-            if(parent != null )
-                if(selected.get())
-                    parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get()+1);
+            if(parent != null ) {
+                if (selected.get())
+                    parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get() + 1);
                 else
-                    parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get()-1);
-            parent.computerStatusProperty().set(parent.numberOfComputersProperty().get()+"/"+parent.getComputers().size());
+                    parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get() - 1);
+                parent.computerStatusProperty().set(parent.numberOfComputersProperty().get() + "/" + parent.getComputers().size());
+            }
         });
     }
 
