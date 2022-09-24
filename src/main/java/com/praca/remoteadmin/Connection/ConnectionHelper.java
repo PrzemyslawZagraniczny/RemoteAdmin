@@ -14,9 +14,13 @@ import javafx.collections.ObservableList;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
+
 
 /*
 Klasa pomocnicz służąca do:

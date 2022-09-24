@@ -281,7 +281,8 @@ public class SSH2Connector implements IGenericConnector{
             bUnInterrupted = false;
         } finally {
             //session.disconnect();
-            computer.setCmdExitStatus(channel.getExitStatus());
+            if(computer != null && channel != null)
+                computer.setCmdExitStatus(channel.getExitStatus());
             channel = null;
 
         }

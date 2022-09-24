@@ -126,7 +126,6 @@ public class MainController implements ISaveDataObserver {
         txtSudoTm.setText(ConnectionHelper.sudoConnectionTimeOut+"");
         txtSshTm.setText(ConnectionHelper.sshConnectionTimeOut +"");
         chkHistorySave.setSelected(ConnectionHelper.historySave);
-        HistoryLog.loadData(cmdLine);
 
         btnExecCmd.setDisable(true);
         tabPane.getSelectionModel().select(1);      //ustaw domyślnie drugą zakładkę na starcie
@@ -214,8 +213,13 @@ public class MainController implements ISaveDataObserver {
         //        data.get(1).setStat(StatusType.ACTIVE);
         //        if( true) return;
         btnExecCmd.setDisable(true);
+
         String cmd = cmdLine.getSelectionModel().getSelectedItem().trim();
+        String hash = HistoryLog.calcHashForHistoryLog(loginField.getText());
+        HistoryLog.loadData(cmdLine, hash);
+        HistoryLog.addCommand(cmdLine,hash, cmd);
         cmdLine.getItems().add(0, cmd);
+
         if(checkIfSudoCommand(cmd)) {
 
             SSH2Connector.setSudoPassword();
@@ -298,7 +302,7 @@ public class MainController implements ISaveDataObserver {
                     }
                     sshSessions.clear();
 
-                    Platform.runLater(new Runnable() {
+                    Platform.runLater(new Runnable() {      //modyfikacja GUI na głównym wątku
                         @Override
                         public void run() {
                             btnExecCmd.setDisable(true);
@@ -371,18 +375,23 @@ public class MainController implements ISaveDataObserver {
     //klik na przycisk "Połącz"
     public void onConect(ActionEvent actionEvent) {
 
+
+
         btConnect.setDisable(true);
         if(sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
             btConnect.setText("Połącz");
+            cmdLine.getItems().clear();         //usuń historię gdy nie jesteśmy połączeni
             //najpierw pozamykać wszystkie połączenia
             execParallel(CmdType.DISCONNECTING);
             return;
         }
         btConnect.setText("Rozłącz");
+        String hash = HistoryLog.calcHashForHistoryLog(loginField.getText());
+        HistoryLog.loadData(cmdLine, hash);
 
-        //sale = ConnectionHelper.loadData(JSON);
         if(sale == null) {
             //TODO: błąd wczytania (do logera i na ekran)
+            ConnectionHelper.log.error("LabRooms ar undefined!!!");
             return;
         }
         //LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
