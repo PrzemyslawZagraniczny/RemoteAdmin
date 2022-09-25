@@ -30,16 +30,15 @@ public class Settings implements Serializable {
 
     public static void loadSettings() {
         ObjectMapper objectMapper = new ObjectMapper();
-        InputStream fin = null;
+        File fin = null;
 
         try {
-            fin = new FileInputStream("settings.json");
+            fin = new File("settings.json");
             Settings settings = objectMapper.readValue(fin, Settings.class);
             ConnectionHelper.sshConnectionTimeOut = settings.sshTm;
             ConnectionHelper.sudoConnectionTimeOut = settings.sudoTm;
             ConnectionHelper.historySave = settings.historyOn;
 
-            fin.close();
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -52,9 +51,9 @@ public class Settings implements Serializable {
 
         try {
             File fout = new File("settings.json");
+            //System.out.println(fout);
             Settings settings = new Settings(ConnectionHelper.sshConnectionTimeOut,ConnectionHelper.sudoConnectionTimeOut);
             objectMapper.writeValue(fout, settings);
-            
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());

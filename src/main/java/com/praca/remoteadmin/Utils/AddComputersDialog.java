@@ -82,7 +82,7 @@ public class AddComputersDialog {
         return ip;
     }
 
-    public AddComputersDialog(LabRoom room, ISaveDataObserver observer) {
+    public AddComputersDialog(ObservableList<LabRoom> sale, LabRoom room, ISaveDataObserver observer) {
 
         int row = 0;
         TextField ipTextField = new TextField("");
@@ -285,6 +285,8 @@ public class AddComputersDialog {
                 if(c.isSelected()) {
                     System.out.println(c.getAddress());
                     room.appendComputer(c);
+                    c.setLabs(sale);
+                    c.setParent(room);
                 }
         }
         observer.saveData();

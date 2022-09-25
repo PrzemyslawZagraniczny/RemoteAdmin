@@ -14,7 +14,9 @@ import java.util.List;
 public class LabRoom  {
     public void setComputers(List<Computer> computers) {
         this.computers = computers;
-        for(Computer c : computers) c.setParent(this);
+        for(Computer c : computers) {
+            c.setParent(this);
+        }
         if(computers != null)
             compsObsrv = FXCollections.observableArrayList(computers);
         else

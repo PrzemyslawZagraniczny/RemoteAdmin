@@ -12,10 +12,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 //klasa zarządza wpisami historycznymi do konsoli
 public class HistoryLog {
@@ -80,6 +77,7 @@ public class HistoryLog {
         }
         if (cb != null) {
             cb.getItems().removeAll();
+            Collections.reverse(list);
             for(String linia : list) {
                 String cmd = linia;
                 histList.addFirst(cmd);

@@ -2,14 +2,45 @@ package com.praca.remoteadmin.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
+import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
+import com.praca.remoteadmin.Connection.SSH2Connector;
 import com.praca.remoteadmin.Utils.ExitStatusMapper;
+import javafx.application.Platform;
 import javafx.beans.property.*;
+import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
 
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
     private SimpleStringProperty  address = new SimpleStringProperty();
+
+
+    public SSH2Connector getSshConnector() {
+        return sshConnector;
+    }
+
+    public void setSshConnector(SSH2Connector sshConnector) {
+        this.sshConnector = sshConnector;
+    }
+
+    @JsonIgnore
+    private SimpleBooleanProperty update = new SimpleBooleanProperty(false);
+
+    public void setUpdate(boolean update) {
+        this.update.set(update);
+    }
+
+    @JsonIgnore
+    SSH2Connector sshConnector = null;
+
+    @JsonIgnore
+    private ConsoleCaptureOutput out = null;
 
     public String getStatus() {
         return status.get();
@@ -27,8 +58,22 @@ public class Computer {
         this.observer = observer;
     }
 
+    //do zapisu danych z SSH
+    @JsonIgnore
+    PrintStream ps = null;
+    @JsonIgnore
+    ByteArrayOutputStream bs = null;
+
+
     @JsonIgnore
     LabRoom parent = null;
+    @JsonIgnore
+    ObservableList<LabRoom> labs = null;
+
+    public void setLabs(ObservableList<LabRoom> labs) {
+        this.labs = labs;
+    }
+
     @JsonIgnore
     private ISaveDataObserver observer = null;
     @JsonIgnore
@@ -38,7 +83,21 @@ public class Computer {
     private StatusType stat = StatusType.UNKNOWN;
 
     //czy maszyna zostala wybrana do poczenia (ustawiane checkboxem)
-    private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
+    private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);
+
+    public boolean isPrintout() {
+        return printout.get();
+    }
+
+    public SimpleBooleanProperty printoutProperty() {
+        return printout;
+    }
+
+    public void setPrintout(boolean printout) {
+        this.printout.set(printout);
+    }
+
+    private SimpleBooleanProperty printout = new SimpleBooleanProperty(false);
     @JsonIgnore
     private SimpleStringProperty cmdExitStatus = new SimpleStringProperty("");
 
@@ -72,25 +131,36 @@ public class Computer {
         } else {
 
             if(cmdExitStatus != 0) {
-//                Platform.runLater(() -> {
-//                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-//                    alert.setTitle("Uwaga!");
-//                    alert.setHeaderText(getAddress());
-//                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<" + cmdExitStatus + ">>");
-//                    alert.show();
-//                });
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Uwaga!");
+                    alert.setHeaderText(getAddress());
+                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<" + cmdExitStatus + ">>");
+                    //alert.show();
+                });
             }
 
         }
     }
 
-    public Computer() {
-        addSelectedListener();
-
+    public PrintStream getPs() {
+        return ps;
     }
 
+    public Computer() {
+        addSelectedListener();
+        clearBuffer();
+
+        
+
+
+    }
+    public void setOutputStream(ConsoleCaptureOutput out) {
+        this.out = out;
+    }
     public Computer(LabRoom parent, String sName, String sAddress, StatusType stat) {
         this.parent = parent;
+        clearBuffer();
 
         this.name.set(sName);
         this.address.set(sAddress);
@@ -114,6 +184,49 @@ public class Computer {
                 else
                     parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get() - 1);
                 parent.computerStatusProperty().set(parent.numberOfComputersProperty().get() + "/" + parent.getComputers().size());
+            }
+        });
+        update.addListener(change -> {
+            if(printout.get())
+            {
+                if (out != null) {
+                    writeToConsole();
+
+                }
+            }
+
+        });
+        printout.addListener(change -> {
+            if(change == printout) {
+
+            }
+            if(!printout.get())     //symuluj radiobutton (co najmniej jeden musi być zaznaczony) ale we wszystkich salach
+            {
+                boolean exclusive = false;
+                if (labs != null) {
+                    for (LabRoom r : labs)
+                        for (Computer c : r.getComputers()) {
+                            if (c != this)
+                                exclusive |= c.printout.get();
+                        }
+                }
+
+                if(!exclusive) {
+                    printout.set(true);
+                }
+            }
+            else {                  //jeśli piszemy do okienka konsoli
+
+                if (labs != null) {
+                    for(LabRoom r : labs)
+                        for (Computer c : r.getComputers()) {
+                            if (c != this)
+                                c.setPrintout(false);
+                        }
+                }
+                if (out != null) {
+                    writeToConsole();
+                }
             }
         });
     }
@@ -168,5 +281,45 @@ public class Computer {
 
     public void setParent(LabRoom labRoom) {
         parent = labRoom;
+    }
+
+    public void clearBuffer() {
+        bs = new ByteArrayOutputStream(1024 * 10);
+        ps = new PrintStream(bs);
+    }
+
+    public void writeAll(String str) {
+        synchronized (ps) {
+            ps.write(str.getBytes(),0, str.length());
+            writeToConsole();
+        }
+    }
+
+    public void write(byte[] buf, int i) {
+        synchronized (ps) {
+            ps.write(buf, 0, i);
+            writeToConsole();
+      }
+    }
+
+    private void writeToConsole() {
+        if(out != null && printout.get()) {
+            Platform.runLater(() -> {
+                try {
+                    out.clear();
+                    ps.flush();
+                    bs.flush();
+                    out.writeAll(bs.toString(Charset.defaultCharset()));
+                    out.flush();
+                } catch (IOException e) {
+                    ConnectionHelper.log.error(e.getMessage());
+                }
+            });
+        }
+    }
+
+    public void refresh() {
+        //update.set(!update.get());
+        //printout.set(printout.get());
     }
 }

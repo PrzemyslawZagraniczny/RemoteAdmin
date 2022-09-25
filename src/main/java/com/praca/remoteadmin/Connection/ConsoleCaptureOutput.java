@@ -41,16 +41,20 @@ public class ConsoleCaptureOutput extends OutputStream {
             txt.setFocusTraversable(true);
         } else {
 
-            EventQueue.invokeLater(new Runnable() {
+            Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
 
                     txt.appendText(c+"");
                     txt.requestFocus();
+                    txt.end();
                 }
             });
 
         }
     }
 
+    public void clear() {
+        txt.clear();
+    }
 }

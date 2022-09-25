@@ -62,11 +62,11 @@ public class SSH2Connector implements IGenericConnector{
         //pętla do wypełniania progressbar tabelki w czasie nawiązywania połączenia
         TimerTask tt = new TimerHelper(ConnectionHelper.sshConnectionTimeOut);
         java.util.Timer tim = new java.util.Timer();
-        tim.schedule(tt, 0,1000);
+        tim.schedule(tt, 1000,1000);
 
         try {
             //session.setTimeout(ConnectionHelper.sshConnectionTimeOut);
-            session.connect();
+            session.connect(ConnectionHelper.sshConnectionTimeOut);
         } catch (JSchException e) {
             tim.cancel();
             computer.setStat(StatusType.OFFLINE);
@@ -78,6 +78,7 @@ public class SSH2Connector implements IGenericConnector{
                 this.err.write( e.getMessage().getBytes(Charset.forName("UTF-8")));
             } catch (IOException ex) {
                 ConnectionHelper.log.error(e.getMessage());
+                latch.countDown();
                 //throw new RuntimeException(ex);
             }
             return false;
@@ -189,7 +190,8 @@ public class SSH2Connector implements IGenericConnector{
 
             if (result.isPresent()){
                 sudo_pass = result.get();
-                return sudo_pass;
+
+                return sudo_pass.isEmpty()?null:sudo_pass ;
             }
             else
                 return null;
@@ -200,7 +202,8 @@ public class SSH2Connector implements IGenericConnector{
     }
     private void exec(String cmd) {
         boolean bUnInterrupted = true;
-
+        InputStream in = null;
+        int timeOut = 0;
         try {
             //if(channel == null || channel.isClosed())
             {
@@ -210,82 +213,93 @@ public class SSH2Connector implements IGenericConnector{
                 channel.setInputStream(System.in);
                 //channel.setInputStream(null);
             }
+            computer.clearBuffer();     //przed poleceniem resetuj bufory zapisu
+            computer.writeAll(">" + cmd + System.lineSeparator());
+            computer.refresh();
             ((ChannelExec) channel).setErrStream(err);
-            int timeOut = ConnectionHelper.sshConnectionTimeOut;
-            if(!checkIfSudoCommand(cmd)) {
+            timeOut = ConnectionHelper.sshConnectionTimeOut;
+            if (!checkIfSudoCommand(cmd)) {
                 ((ChannelExec) channel).setCommand(cmd);
-                ((ChannelExec) channel).setErrStream(err,false);
-                ((ChannelExec)channel).setOutputStream(out);
+                ((ChannelExec) channel).setErrStream(err, false);
+                ((ChannelExec) channel).setOutputStream(computer.getPs());
                 channel.connect(timeOut);
-             }
-            else {
+            } else {
                 timeOut = ConnectionHelper.sudoConnectionTimeOut;
             }
-            InputStream in = channel.getInputStream();
-
-            this.out.writeAll(">" + cmd + System.lineSeparator());
-
-
-            byte[] tmp=new byte[1024];
-            final int sleepTm = 100;
-            int cntr = timeOut/sleepTm;
-            while(bUnInterrupted){
-                while(in.available()>0){
-                    int i=in.read(tmp, 0, 1024);
-                    if(i<0)break;
-                    this.out.writeAll(new String(tmp));
-                }
-                if(channel.isClosed()){
-                    if(in.available()>0) continue;
-                    //dodaj znak nowej lini na koniec
-                    this.out.writeAll(new String(System.lineSeparator()));
-                    //wpisujemy do tabelki wyjściowy exit status dla polecenia
-                    computer.setCmdExitStatus(channel.getExitStatus());
-                    ConnectionHelper.log.info("Querrying <<"+computer.getAddress()+">> exit-status:" + channel.getExitStatus());
-                    latch.countDown();
-                    break;
-                }
-                cntr --;
-
-                if(cntr <= 0) {
-                    latch.countDown();
-                    ConnectionHelper.log.error("RemoteAdmin application timeout exception exceeded. Change application settings");
-                    computer.setCmdExitStatus(110);
-                    return;
-                }
-
-                Thread.sleep(sleepTm);
-                computer.setProgressStatus(computer.getProgressStatus() + sleepTm/(double)timeOut);
-
-            }
-        }catch (NullPointerException e) {
-            System.err.println(e.getMessage());
-            ConnectionHelper.log.error(e.getMessage());
-            latch.countDown();
-            bUnInterrupted = false;
+            in = channel.getInputStream();
         } catch (JSchException e) {
             ConnectionHelper.log.error(e.getMessage());
             System.err.println(e.getMessage());
             latch.countDown();
-            bUnInterrupted = false;
-            //Thread.currentThread().interrupt();
+            return;
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
             System.err.println(e.getMessage());
             latch.countDown();
-            bUnInterrupted = false;
-        } catch (InterruptedException e) {
-            ConnectionHelper.log.error(e.getMessage());
-            System.err.println(e.getMessage());
-            latch.countDown();
-            bUnInterrupted = false;
-        } finally {
-            //session.disconnect();
-            if(computer != null && channel != null)
-                computer.setCmdExitStatus(channel.getExitStatus());
-            channel = null;
-
+            return;
         }
+
+
+        byte[] tmp=new byte[1024];
+            final int sleepTm = 100;
+            int cntr = timeOut/sleepTm;
+            while(bUnInterrupted){
+                try {
+                    while(in.available()>0){
+                        int i=in.read(tmp, 0, 1024);
+                        if(i<0)break;
+                        computer.write(tmp, i);    //zapisuj do bufora konkretnego komputera a nie do TextArea
+                        //System.out.write(tmp, 0 , i);
+                        computer.refresh();
+                    }
+                    if(channel.isClosed()){
+                        if(in.available()>0) continue;
+                        //dodaj znak nowej lini na koniec
+                        computer.writeAll(System.lineSeparator());    //zapisuj do bufora konkretnego komputera a nie do TextArea
+                        //wpisujemy do tabelki wyjściowy exit status dla polecenia
+                        computer.setCmdExitStatus(channel.getExitStatus());
+                        ConnectionHelper.log.info("Querrying <<"+computer.getAddress()+">> exit-status:" + channel.getExitStatus());
+                        latch.countDown();
+                        break;
+                    }
+                    cntr --;
+
+                    if(cntr <= 0) {
+                        latch.countDown();
+                        ConnectionHelper.log.error("RemoteAdmin application timeout exception exceeded. Change application settings");
+                        computer.setCmdExitStatus(110);
+                        return;
+                    }
+
+                    Thread.sleep(sleepTm);
+                    computer.setProgressStatus(computer.getProgressStatus() + sleepTm/(double)timeOut);
+                }catch (NullPointerException e) {
+                    System.err.println(e.getMessage());
+                    ConnectionHelper.log.error(e.getMessage());
+                    latch.countDown();
+                    bUnInterrupted = false;
+                } catch (IOException e) {
+                    ConnectionHelper.log.error(e.getMessage());
+                    System.err.println(e.getMessage());
+                    latch.countDown();
+                    bUnInterrupted = false;
+                } catch (InterruptedException e) {
+                    ConnectionHelper.log.error(e.getMessage());
+                    System.err.println(e.getMessage());
+                    latch.countDown();
+                    bUnInterrupted = false;
+                } finally {
+                    //session.disconnect();
+                    if(computer != null) {
+                        if(channel != null )
+                            computer.setCmdExitStatus(channel.getExitStatus());
+                        computer.refresh();
+                    }
+                    channel = null;
+                }
+            }
+
+
     }
 
     //sprawdz czy to jest komenda sudo
@@ -311,12 +325,9 @@ public class SSH2Connector implements IGenericConnector{
             return false;
         ((ChannelExec)channel).setErrStream(System.err, false);
         ((ChannelExec)channel).setCommand("sudo -S -p '' "+cmd);
-        OutputStream out= null;
 
         try {
-            InputStream in = channel.getInputStream();
-            out = channel.getOutputStream();
-
+            OutputStream out = channel.getOutputStream();
             channel.connect(ConnectionHelper.sudoConnectionTimeOut);
             out.write((sudo_pass+"\n").getBytes());
             out.flush();
@@ -335,6 +346,7 @@ public class SSH2Connector implements IGenericConnector{
             session.disconnect();
             session = null;
             channel = null;
+            computer.clearBuffer();         //usuń historię wyników z poleceń
             computer.setStat(StatusType.OFFLINE);
             computer.setProgressStatus(0);
             ConnectionHelper.log.info("Successfully disconnected from <<"+computer.getAddress()+">>");

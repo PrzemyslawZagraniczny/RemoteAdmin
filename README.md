@@ -1,6 +1,11 @@
 # RemoteAdmin
 Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zdalnej synchronizachi poleceń na wielu stacjach roboczych.
 
+## wersja 1.2.0
+<li>poprawna obsługa konsoli wyjściowej</li>
+<li>usuniętych mnóstwo błędów i nieprawidłowych zachowań programu</li>
+
+
 ## wersja 1.1.0
 <li>dodawanie komputerów/pracowni</li>
 <li>zapisywanie zmian w pliku data.json</li>
