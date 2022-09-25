@@ -3,6 +3,8 @@ Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zd
 
 ## wersja 1.2.0
 <li>poprawna obsługa konsoli wyjściowej</li>
+<li>spersonalizowana historia wprowadzanych poleceń</li>
+<li>przewijanie po histori poleceń klawiszami UP/DOWN</li>
 <li>usuniętych mnóstwo błędów i nieprawidłowych zachowań programu</li>
 
 
