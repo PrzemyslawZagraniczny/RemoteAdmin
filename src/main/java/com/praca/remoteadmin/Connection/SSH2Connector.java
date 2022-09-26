@@ -3,6 +3,7 @@ package com.praca.remoteadmin.Connection;
 import com.jcraft.jsch.*;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.StatusType;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -46,14 +47,17 @@ public class SSH2Connector implements IGenericConnector{
         this.sPassword = sPassword;
         this.computer = comp;
 
+        comp.resetFlags();
         try {
             session = jsch.getSession(sLogin, comp.getAddress(), iPort);
         }catch (NullPointerException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
+            return false;
         } catch (JSchException e) {
+            e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
-            throw new RuntimeException(e);
+            return false;
         }
 
         UserInfo ui=new SSHUserInfo();
@@ -69,16 +73,35 @@ public class SSH2Connector implements IGenericConnector{
             session.connect(ConnectionHelper.sshConnectionTimeOut);
         } catch (JSchException e) {
             tim.cancel();
-            computer.setStat(StatusType.OFFLINE);
-            computer.setProgressStatus(0);
-            computer.setCmdExitStatus(-1);
+
+            Platform.runLater(() -> {
+                computer.setProgressStatus(0);
+                //computer.setCmdExitStatus(-1);
+                String oldStat = computer.getStatus();
+                if(e.getLocalizedMessage().split(":").length>1)
+                    computer.setStatus(e.getLocalizedMessage().split(":")[1]);
+                else
+                    computer.setStatus(e.getLocalizedMessage());
+//                new Thread(() -> {
+//                    try {
+//                        Thread.sleep(5000);
+//                        Platform.runLater(() -> computer.setStatus(oldStat));
+//                    } catch (InterruptedException ex) {
+//                        ConnectionHelper.log.error(ex.getMessage());
+//                        ex.printStackTrace();
+//                    }
+//                }).start();
+                // computer.setStat(StatusType.UNKNOWN);
+                //computer.setCmdExitStatus(e.getMessage());
+            });
             ConnectionHelper.log.error("Connection with <<" + comp.getAddress()+">> failed!");
             ConnectionHelper.log.error(e.getMessage());
+
             try {
                 this.err.write( e.getMessage().getBytes(Charset.forName("UTF-8")));
             } catch (IOException ex) {
                 ConnectionHelper.log.error(e.getMessage());
-                latch.countDown();
+                computer.setCmdExitStatus(110);
                 //throw new RuntimeException(ex);
             }
             return false;
@@ -90,26 +113,24 @@ public class SSH2Connector implements IGenericConnector{
             if( !session.isConnected()) {
                 //TODO: zdefiniuj własny wyjątek
                 computer.setStat(StatusType.OFFLINE);
-                computer.setCmdExitStatus(-1);
+                computer.setCmdExitStatus(110);
                 //computer.setProgressStatus(0);
                 ConnectionHelper.log.error("Connection with <<" + comp.getAddress()+">> failed!");
                 //throw new ExceptionInInitializerError("Connection not established!");
             }
             else { //połączenie udane
                 computer.setStat(StatusType.CONNECTED);
-                computer.setCmdExitStatus(0);
+                computer.clearCmdExitStatus();
                 ConnectionHelper.log.info("Successfully connected with <<"+computer.getAddress()+">>");
                 return true;
             }
-
-
          }catch (NullPointerException e) {
-            System.err.println(e.getMessage());
-            ConnectionHelper.log.error("First call method <<openConnection>>");
+            e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
             return false;
         }
 
+        computer.refresh();
         return false;
     }
 
@@ -124,27 +145,6 @@ public class SSH2Connector implements IGenericConnector{
     }
 
 
-
-    public void setSudoPassword1(){
-        //aby nie powtarzać dla każdej maszyny
-        synchronized (sudo_pass) {
-            if (sudo_pass.length() > 0)
-                return;
-
-            JTextField passwordField = (JTextField) new JPasswordField(8);
-            Object[] ob = {passwordField};
-            int result =
-                    JOptionPane.showConfirmDialog(null,
-                            ob,
-                            "Enter password for sudo",
-                            JOptionPane.OK_CANCEL_OPTION);
-            if (result != JOptionPane.OK_OPTION) {
-                System.exit(-1);
-                return;
-            }
-            sudo_pass = passwordField.getText();
-        }
-    }
     public static synchronized String setSudoPassword(){
         //aby nie powtarzać dla każdej maszyny
         synchronized (sudo_pass) {
@@ -210,39 +210,36 @@ public class SSH2Connector implements IGenericConnector{
                 //resetuj progres przed kolejnym zadaniem
                 computer.setProgressStatus(0);
                 channel = session.openChannel("exec");
-                channel.setInputStream(System.in);
+                //channel.setInputStream(System.in);
                 //channel.setInputStream(null);
             }
             computer.clearBuffer();     //przed poleceniem resetuj bufory zapisu
+            computer.clearCmdExitStatus();
             computer.writeAll(">" + cmd + System.lineSeparator());
             computer.refresh();
-            ((ChannelExec) channel).setErrStream(err);
+            if(computer.isPrintout())
+                ((ChannelExec) channel).setErrStream(err);
+            else
+                ((ChannelExec) channel).setErrStream(System.err);
+
             timeOut = ConnectionHelper.sshConnectionTimeOut;
             if (!checkIfSudoCommand(cmd)) {
                 ((ChannelExec) channel).setCommand(cmd);
-                ((ChannelExec) channel).setErrStream(err, false);
+                if(computer.isPrintout())
+                    ((ChannelExec) channel).setErrStream(err, false);
+                else
+                    ((ChannelExec) channel).setErrStream(System.err, false);
+
                 ((ChannelExec) channel).setOutputStream(computer.getPs());
                 channel.connect(timeOut);
+
             } else {
                 timeOut = ConnectionHelper.sudoConnectionTimeOut;
             }
             in = channel.getInputStream();
-        } catch (JSchException e) {
-            ConnectionHelper.log.error(e.getMessage());
-            System.err.println(e.getMessage());
-            latch.countDown();
-            return;
-        } catch (IOException e) {
-            ConnectionHelper.log.error(e.getMessage());
-            System.err.println(e.getMessage());
-            latch.countDown();
-            return;
-        }
-
-
-        byte[] tmp=new byte[1024];
             final int sleepTm = 100;
             int cntr = timeOut/sleepTm;
+            byte[] tmp=new byte[1024];
             while(bUnInterrupted){
                 try {
                     while(in.available()>0){
@@ -263,42 +260,78 @@ public class SSH2Connector implements IGenericConnector{
                         break;
                     }
                     cntr --;
-
-                    if(cntr <= 0) {
+                    if(computer.isAborted()) {
                         latch.countDown();
-                        ConnectionHelper.log.error("RemoteAdmin application timeout exception exceeded. Change application settings");
-                        computer.setCmdExitStatus(110);
+                        ConnectionHelper.log.error("Task aborted by User.");
+                        channel.disconnect();
+                        session.disconnect();
+                        computer.setCmdExitStatus("Połączenie zerwane.");
+                        computer.setStat(StatusType.DISCONNECTED);
+                    }
+                    if(computer.isAborted()) {
+                        latch.countDown();
+                        ConnectionHelper.log.error("Task put to Bg by User.");
+                        //computer.setCmdExitStatus("");
                         return;
                     }
-
+//                    if(cntr <= 0) {
+//                        //channel.getExitStatus()
+////                        latch.countDown();
+////                        ConnectionHelper.log.error("RemoteAdmin application timeout exception exceeded. Change application settings");
+////                        computer.setCmdExitStatus(channel.getExitStatus());
+//
+//                        return;
+//                    }
+                    computer.refresh();
+                    System.err.print("TIK");
                     Thread.sleep(sleepTm);
                     computer.setProgressStatus(computer.getProgressStatus() + sleepTm/(double)timeOut);
                 }catch (NullPointerException e) {
-                    System.err.println(e.getMessage());
+//                    e.printStackTrace();
                     ConnectionHelper.log.error(e.getMessage());
                     latch.countDown();
                     bUnInterrupted = false;
+                    if (channel != null)
+                        computer.setCmdExitStatus(channel.getExitStatus());
                 } catch (IOException e) {
                     ConnectionHelper.log.error(e.getMessage());
-                    System.err.println(e.getMessage());
+                    e.printStackTrace();
+                    computer.setCmdExitStatus(110);
                     latch.countDown();
                     bUnInterrupted = false;
+                    if (channel != null)
+                        computer.setCmdExitStatus(channel.getExitStatus());
                 } catch (InterruptedException e) {
                     ConnectionHelper.log.error(e.getMessage());
-                    System.err.println(e.getMessage());
+                    e.printStackTrace();
                     latch.countDown();
                     bUnInterrupted = false;
-                } finally {
-                    //session.disconnect();
-                    if(computer != null) {
-                        if(channel != null )
-                            computer.setCmdExitStatus(channel.getExitStatus());
-                        computer.refresh();
-                    }
-                    channel = null;
+                    if (channel != null)
+                        computer.setCmdExitStatus(channel.getExitStatus());
                 }
             }
+        } catch (JSchException e) {
+            ConnectionHelper.log.error(e.getMessage());
+            e.printStackTrace();
+            latch.countDown();
+            computer.refresh();
+            return;
+        } catch (IOException e) {
+            ConnectionHelper.log.error(e.getMessage());
+            e.printStackTrace();
+            computer.refresh();
+            latch.countDown();
+            return;
+        }
 
+
+
+
+        if(computer != null) {
+            if (channel != null)
+                computer.setCmdExitStatus(channel.getExitStatus());
+            computer.refresh();
+        }
 
     }
 
@@ -323,19 +356,20 @@ public class SSH2Connector implements IGenericConnector{
         }
         else
             return false;
-        ((ChannelExec)channel).setErrStream(System.err, false);
+        if(computer.isPrintout())
+            ((ChannelExec) channel).setErrStream(err, false);
+        else
+            ((ChannelExec) channel).setErrStream(System.err, false);
         ((ChannelExec)channel).setCommand("sudo -S -p '' "+cmd);
-
+        channel.setOutputStream(null);
         try {
-            OutputStream out = channel.getOutputStream();
-            channel.connect(ConnectionHelper.sudoConnectionTimeOut);
-            out.write((sudo_pass+"\n").getBytes());
-            out.flush();
-        } catch (IOException e) {
-            ConnectionHelper.log.error(e.getMessage());
+            channel.connect(ConnectionHelper.sshConnectionTimeOut);
         } catch (JSchException e) {
             ConnectionHelper.log.error(e.getMessage());
+            e.printStackTrace();
+            e.printStackTrace();
         }
+        passArgs(sudo_pass);
 
         return bRet;
     }
@@ -351,10 +385,30 @@ public class SSH2Connector implements IGenericConnector{
             computer.setProgressStatus(0);
             ConnectionHelper.log.info("Successfully disconnected from <<"+computer.getAddress()+">>");
         }catch (NullPointerException e) {
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
         }
     }
+
+    @Override
+    public void passArgs(String args) {
+        try {
+
+            OutputStream out = channel.getOutputStream();
+
+            out.write((args+System.lineSeparator()).getBytes());
+            out.flush();
+
+        } catch (IOException e) {
+            ConnectionHelper.log.error(e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean isOpened() {
+        return session.isConnected();
+    }
+
     @Override
     public void execCommand(String cmd, CountDownLatch latch) {
         this.latch = latch;
@@ -366,75 +420,7 @@ public class SSH2Connector implements IGenericConnector{
 
 
         public boolean promptYesNo(String str){
-            if(checkIfIgnore(str))  //sprawdza czy ignorowac komunikat
-                return true;
-            Object[] options={ "Tak", "Nie", "Tak (Ignoruj przyszłe)" };
-            int retVal= JOptionPane.showOptionDialog(null,
-                    str,
-                    "Uwaga!",
-                    JOptionPane.DEFAULT_OPTION,
-                    JOptionPane.WARNING_MESSAGE,
-                    null, options, options[0]);
-            if(retVal == 2) {
-                //tzn zapisz komunikat do ignorowania w przyszłości
-                //TODO: THREAD Safe Alert!!!!
-                //ConnectionHelper.bRSAKeyFingerprintIgnore = true;
-            }
-            ConnectionHelper.log.warn(str+" ANSWER"+((retVal == 2 || retVal==0)?"Yes":"No"));
-            return retVal==0 || retVal == 2;
-            //TODO: Alert działa na osobnym procesie przez co nie może wrócić natychmiastowo wyniku zadbaj aby to zsynchronizować
-
-//            ExecutorService executorService = Executors.newFixedThreadPool(1);
-//            MessageBoxTask task = new MessageBoxTask(str);
-//            executorService.execute(task);
-//            boolean retVal = true;
-//            try {
-//                retVal = task.get();
-//            } catch (InterruptedException e) {
-//                throw new RuntimeException(e);
-//            } catch (ExecutionException e) {
-//                throw new RuntimeException(e);
-//            }
-//            executorService.shutdown();
-
-//            Platform.runLater(new Runnable() {
-//                @Override
-//                public void run() {
-//                    Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-//                    alert.setTitle("Uwaga!");
-//                    alert.setHeaderText("");
-//                    alert.setContentText(str);
-//                    System.out.println("promptYesNo OK.");
-//                    AtomicBoolean retVal = new AtomicBoolean(false);
-//                    alert.showAndWait().ifPresent(rs -> {
-//                        if (rs == ButtonType.OK) {
-//                            System.out.println("Pressed OK.");
-//                            retVal.set(true);
-//                        } else
-//                            retVal.set(false);
-//                    });
-//                    System.out.println("return OK.");
-//                    //return retVal.get();                }
-//                }
-//            });
-        }
-
-        private boolean checkIfIgnore(String str) {
-
-            if(ConnectionHelper.bRSAKeyFingerprintIgnore) {
-                String regex = "The authenticity of host '(.)*' can't be established.\n" +
-                        "RSA key fingerprint is (.)*.\n" +          //([a-f]|[0-9]|:)
-                        "Are you sure you want to continue connecting?";
-
-                Pattern r = Pattern.compile(regex);
-
-                // Now create matcher object.
-                Matcher m = r.matcher(str);
-
-                if (m.find())
-                    return true;
-            }
-            return false;
+            return true;
         }
 
         String passwd;

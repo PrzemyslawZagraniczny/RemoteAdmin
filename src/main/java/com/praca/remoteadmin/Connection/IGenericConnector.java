@@ -12,4 +12,8 @@ public interface IGenericConnector {
     void setOutputStream(ConsoleCaptureOutput out);
     void execCommand(String cmd, CountDownLatch latch);
     void disconnect();
+
+    void passArgs(String args);
+
+    boolean isOpened();
 }

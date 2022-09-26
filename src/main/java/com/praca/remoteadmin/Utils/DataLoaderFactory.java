@@ -36,15 +36,16 @@ public class DataLoaderFactory {
                         break;
                     } catch (FileNotFoundException var9) {
                         ConnectionHelper.log.error(var9);
-                        throw new RuntimeException(var9);
+                        var9.printStackTrace();
                     } catch (JsonMappingException var10) {
-                        throw new RuntimeException(var10);
+                        ConnectionHelper.log.error(var10);
+                        var10.printStackTrace();
                     } catch (JsonParseException var11) {
                         ConnectionHelper.log.error(var11);
-                        //throw new RuntimeException(var11);
+                        var11.printStackTrace();
                     } catch (IOException var12) {
                         ConnectionHelper.log.error(var12);
-                        throw new RuntimeException(var12);
+                        var12.printStackTrace();
 
                     }
                 case TXT:

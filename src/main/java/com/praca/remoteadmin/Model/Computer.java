@@ -15,11 +15,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
     private SimpleStringProperty  address = new SimpleStringProperty();
 
+    @JsonIgnore
+    AtomicBoolean bgCommand = new AtomicBoolean(false);
+
+    @JsonIgnore
+    AtomicBoolean abortCommand = new AtomicBoolean(false);
 
     public SSH2Connector getSshConnector() {
         return sshConnector;
@@ -125,21 +131,11 @@ public class Computer {
     }
 
     public void setCmdExitStatus(int cmdExitStatus) {
-        this.cmdExitStatus.set(ExitStatusMapper.fromExitCode(cmdExitStatus) +" ("+ cmdExitStatus+")");
-
-        if (EventQueue.isDispatchThread()) {
-        } else {
-
-            if(cmdExitStatus != 0) {
-                Platform.runLater(() -> {
-                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                    alert.setTitle("Uwaga!");
-                    alert.setHeaderText(getAddress());
-                    alert.setContentText("Maszyna wróciła status wykonania polecenia <<" + cmdExitStatus + ">>");
-                    //alert.show();
-                });
-            }
-
+        try {
+            this.cmdExitStatus.set(ExitStatusMapper.fromExitCode(cmdExitStatus) + " (" + cmdExitStatus + ")");
+        }catch(Exception e)
+        {
+            ConnectionHelper.log.error(e.getMessage());
         }
     }
 
@@ -276,6 +272,13 @@ public class Computer {
 
     public void setStat(StatusType stat) {
         this.stat = stat;
+        switch(stat) {
+            case OFFLINE:
+            case TIME_OUT:
+            case UNKNOWN:
+                clearCmdExitStatus();
+                break;
+        }
         status.set(stat.toString());
     }
 
@@ -284,7 +287,7 @@ public class Computer {
     }
 
     public void clearBuffer() {
-        bs = new ByteArrayOutputStream(1024 * 10);
+        bs = new ByteArrayOutputStream((int) ConnectionHelper.bufferSize);
         ps = new PrintStream(bs);
     }
 
@@ -320,6 +323,35 @@ public class Computer {
 
     public void refresh() {
         //update.set(!update.get());
-        //printout.set(printout.get());
+        printout.set(printout.get());
+    }
+
+    public void clearCmdExitStatus() {
+        cmdExitStatus.set("");
+    }
+
+    public void setCmdExitStatus(String message) {
+        cmdExitStatus.set(message);
+    }
+
+    public void abortCommand() {
+        abortCommand.set(true);
+    }
+
+    @JsonIgnore
+    public boolean isAborted() {
+        return abortCommand.get();
+    }
+    @JsonIgnore
+    public boolean isBg() {
+        return bgCommand.get();
+    }
+    public void bgCommand() {
+        bgCommand.set(true);
+    }
+
+    public void resetFlags() {
+        bgCommand.set(false);
+        abortCommand.set(false);
     }
 }

@@ -14,9 +14,11 @@ public class ConsoleCaptureOutput extends OutputStream {
 
     public ConsoleCaptureOutput(TextArea ta) {
         this.txt = ta;
-        txt.setWrapText(true);
-        txt.setEditable(false);
-        ta.clear();
+        Platform.runLater(() ->{
+            txt.setWrapText(true);
+            txt.setEditable(false);
+            ta.clear();
+        });
     }
 
 
@@ -32,26 +34,19 @@ public class ConsoleCaptureOutput extends OutputStream {
     public void write(int b) {
         char c = (char)((b + 256) % 256);
         buffer.append(c);
-
 //        if(c == '$')
         {
             buffer = new StringBuffer();
         }
-        if (EventQueue.isDispatchThread()) {
-            txt.setFocusTraversable(true);
-        } else {
 
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-
-                    txt.appendText(c+"");
-                    txt.requestFocus();
-                    txt.end();
-                }
-            });
-
-        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                txt.appendText(c+"");
+                txt.requestFocus();
+                txt.end();
+            }
+        });
     }
 
     public void clear() {

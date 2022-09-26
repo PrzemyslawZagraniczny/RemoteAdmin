@@ -122,9 +122,7 @@
 123;No medium found
 125;Operation canceled
 126;Required key not available
-127;Key has expired
-128;Key has been revoked
-129;Key was rejected by service
+127;Command not found
 130;Owner died
 131;State not recoverable
 132;Operation not possible due to RF-kill

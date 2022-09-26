@@ -23,7 +23,8 @@ public class ExitStatusMapper {
         }
         for(String linia : list) {
             String []para = linia.split(";");
-            exitStatusMap.put(Integer.parseInt(para[0]), para[1]);
+            if(para.length == 2)
+                exitStatusMap.put(Integer.parseInt(para[0]), para[1]);
         }
         exitStatusMap.put(-1, "FAILED");
     }

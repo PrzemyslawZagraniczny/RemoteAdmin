@@ -18,12 +18,11 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox prefHeight="800.0" prefWidth="933.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
+<VBox prefHeight="912.0" prefWidth="933.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.praca.remoteadmin.Controller.MainController">
   <children>
     <MenuBar prefHeight="25.0" prefWidth="994.0" VBox.vgrow="NEVER">
       <menus>
@@ -42,7 +41,7 @@
         </Menu>
       </menus>
     </MenuBar>
-      <TabPane fx:id="tabPane" prefHeight="774.0" prefWidth="901.0" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
+      <TabPane fx:id="tabPane" prefHeight="886.0" prefWidth="933.0" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE">
         <tabs>
             <Tab text="Pracownie komputerowe">
                <content>
@@ -67,9 +66,9 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TableView>
-                              <Button fx:id="btnAddRoom" layoutX="324.0" layoutY="21.0" mnemonicParsing="false" onAction="#addRoomAction" text="(+) Dodaj pracownię" AnchorPane.leftAnchor="324.0" AnchorPane.topAnchor="21.0" />
-                              <Button fx:id="btnRmRoom" layoutX="468.0" layoutY="21.0" mnemonicParsing="false" onAction="#rmRoomAction" text="(-) Usuń zaznaczone pracownie" AnchorPane.leftAnchor="468.0" AnchorPane.topAnchor="21.0" />
-                              <TextField fx:id="txtNewLabRoom" layoutX="14.0" layoutY="21.0" prefHeight="25.0" prefWidth="297.0" promptText="Nazwa pracowni" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="21.0" />
+                              <Button fx:id="btnAddRoom" layoutX="352.0" layoutY="18.0" mnemonicParsing="false" onAction="#addRoomAction" text="(+) Dodaj pracownię" AnchorPane.leftAnchor="352.0" AnchorPane.topAnchor="18.0" />
+                              <Button fx:id="btnRmRoom" layoutX="560.0" layoutY="18.0" mnemonicParsing="false" onAction="#rmRoomAction" text="(-) Usuń zaznaczone pracownie" AnchorPane.leftAnchor="560.0" AnchorPane.topAnchor="18.0" />
+                              <TextField fx:id="txtNewLabRoom" layoutX="22.0" layoutY="18.0" prefHeight="25.0" prefWidth="297.0" promptText="Nazwa pracowni" AnchorPane.leftAnchor="22.0" AnchorPane.topAnchor="18.0" />
                            </children>
                         </AnchorPane>
                      </children>
@@ -83,20 +82,20 @@
               <content>
                   <VBox maxHeight="1.7976931348623157E308" prefHeight="629.0" prefWidth="901.0">
                      <children>
-                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="411.0" prefWidth="901.0" style="-fx-background-color: transparent;">
+                      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="481.0" prefWidth="933.0" style="-fx-background-color: transparent;">
                            <children>
                               <ComboBox fx:id="cbSala" layoutX="303.0" layoutY="14.0" onAction="#salaSelect" prefHeight="25.0" prefWidth="228.0" AnchorPane.leftAnchor="303.0" AnchorPane.topAnchor="14.0" />
-                              <Label layoutX="183.0" layoutY="18.0" prefHeight="17.0" prefWidth="120.0" text="Sala labortoryjna:" AnchorPane.leftAnchor="183.0" AnchorPane.topAnchor="18.0" />
-                              <CheckBox fx:id="chkSelectAll" layoutX="74.0" layoutY="18.0" mnemonicParsing="false" onAction="#selectAllComputers" selected="true" text="Wszystkie" AnchorPane.leftAnchor="74.0" AnchorPane.topAnchor="18.0" />
-                              <Button fx:id="btnAddComputers" layoutX="555.0" layoutY="14.0" mnemonicParsing="false" onAction="#addCompAction" text="(+) Dodaj komputery" AnchorPane.leftAnchor="555.0" AnchorPane.topAnchor="14.0" />
-                              <Button fx:id="btnRmComputers" layoutX="689.0" layoutY="14.0" mnemonicParsing="false" onAction="#rmCompAction" text="(-) Usuń zaznaczone komputery" />
-                              <TableView fx:id="tabelka" editable="true" layoutX="40.0" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="360.0" prefWidth="873.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
+                              <Label layoutX="161.0" layoutY="18.0" prefHeight="17.0" prefWidth="129.0" text="Sala labortoryjna:" AnchorPane.leftAnchor="161.0" AnchorPane.topAnchor="18.0" />
+                              <CheckBox fx:id="chkSelectAll" layoutX="37.0" layoutY="18.0" mnemonicParsing="false" onAction="#selectAllComputers" selected="true" text="Wszystkie" AnchorPane.leftAnchor="37.0" AnchorPane.topAnchor="18.0" />
+                              <Button fx:id="btnAddComputers" layoutX="547.0" layoutY="14.0" mnemonicParsing="false" onAction="#addCompAction" text="(+) Dodaj komputery" AnchorPane.leftAnchor="547.0" AnchorPane.topAnchor="14.0" />
+                              <Button fx:id="btnRmComputers" layoutX="729.0" layoutY="14.0" mnemonicParsing="false" onAction="#rmCompAction" text="(-) Usuń zaznaczone komputery" />
+                              <TableView fx:id="tabelka" editable="true" layoutX="40.0" layoutY="46.0" maxHeight="1.7976931348623157E308" minWidth="100.0" prefHeight="426.0" prefWidth="893.0" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="46.0">
                                 <columns>
                                     <TableColumn fx:id="printCol" prefWidth="75.0" text="Drukuj wyniki" />
                                     <TableColumn fx:id="selectCol" prefWidth="75.0" text="Zaznacz" />
                                   <TableColumn fx:id="addressCol" editable="false" minWidth="50.0" prefWidth="150.0" text="Adres maszyny" />
                                   <TableColumn fx:id="statusCol" editable="false" minWidth="50.0" prefWidth="100.0" text="Status" />
-                                    <TableColumn fx:id="progressCol" prefWidth="75.0" text="Postęp" />
+                                    <TableColumn fx:id="progressCol" prefWidth="75.0" text="Time-out" />
                                     <TableColumn fx:id="cmdStatCol" prefWidth="75.0" text="Exit status komendy" />
                                 </columns>
                                  <columnResizePolicy>
@@ -111,9 +110,9 @@
                               </TableView>
                            </children>
                         </AnchorPane>
-                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="338.0" prefWidth="933.0">
+                        <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="345.0" prefWidth="933.0">
                            <children>
-                              <TextArea fx:id="consoleOutput" editable="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" prefHeight="220.0" prefWidth="893.0" scrollLeft="11.0" scrollTop="11.0" wrapText="true" AnchorPane.bottomAnchor="60.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="30.0">
+                              <TextArea fx:id="consoleOutput" editable="false" layoutX="18.0" layoutY="39.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="100.0" prefHeight="239.0" prefWidth="901.0" scrollLeft="11.0" scrollTop="11.0" wrapText="true" AnchorPane.bottomAnchor="89.0" AnchorPane.leftAnchor="18.0" AnchorPane.rightAnchor="14.0">
                                  <padding>
                                     <Insets top="10.0" />
                                  </padding>
@@ -121,26 +120,34 @@
                                     <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                                  </opaqueInsets>
                               </TextArea>
-                              <Label layoutX="24.0" layoutY="215.0" prefHeight="17.0" prefWidth="127.0" text="Linia poleceń:" textAlignment="RIGHT" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="24.0" />
-                              <Button fx:id="btnExecCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" layoutX="820.0" layoutY="211.0" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="32.0" />
-                              <HBox alignment="TOP_RIGHT" layoutX="7.0" layoutY="108.0" prefHeight="31.0" prefWidth="868.0" AnchorPane.bottomAnchor="294.0" AnchorPane.leftAnchor="7.0" AnchorPane.rightAnchor="32.0">
-                                 <children>
-                                    <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConsolClear" prefHeight="25.0" prefWidth="161.0" text="Wyczyść konsolę">
-                                       <HBox.margin>
-                                          <Insets right="10.0" />
-                                       </HBox.margin>
-                                    </Button>
-                                    <Button fx:id="btConnect" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConnect" prefHeight="25.0" prefWidth="144.0" style="-fx-border-color: black;" text="Połącz">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Button>
-                                 </children>
-                                 <opaqueInsets>
-                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                 </opaqueInsets>
-                              </HBox>
-                              <ComboBox fx:id="cmdLine" editable="true" layoutX="110.0" layoutY="391.0" onKeyPressed="#onCommandLineKeyTyped" onKeyTyped="#onCommandLineKeyTyped" prefHeight="25.0" prefWidth="700.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="110.0" AnchorPane.rightAnchor="91.0" />
+                              <Label layoutX="18.0" layoutY="354.0" prefHeight="17.0" prefWidth="118.0" text="Linia poleceń:" textAlignment="RIGHT" AnchorPane.bottomAnchor="59.0" AnchorPane.leftAnchor="18.0" />
+                              <Button fx:id="btnExecCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" layoutX="870.0" layoutY="286.0" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" AnchorPane.bottomAnchor="55.0" AnchorPane.rightAnchor="14.0" />
+                              <ComboBox fx:id="cmdLine" editable="true" layoutX="139.0" layoutY="350.0" onKeyPressed="#onCommandLineKeyTyped" onKeyTyped="#onCommandLineKeyTyped" prefHeight="25.0" prefWidth="717.0" AnchorPane.bottomAnchor="55.0" AnchorPane.leftAnchor="139.0" AnchorPane.rightAnchor="77.0" />
+                              <TextField fx:id="txtArgs" layoutX="139.0" layoutY="391.0" prefHeight="25.0" prefWidth="341.0" promptText="Wprowadź dodatkowe argumenty do tego pola." AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="139.0" />
+                              <Button alignment="CENTER" contentDisplay="CENTER" layoutX="598.0" layoutY="1.0" mnemonicParsing="false" onAction="#onConsolClear" prefHeight="25.0" prefWidth="161.0" text="Wyczyść konsolę" AnchorPane.bottomAnchor="340.0" AnchorPane.rightAnchor="174.0" />
+                              <Button fx:id="btConnect" alignment="CENTER" contentDisplay="CENTER" layoutX="775.0" layoutY="1.0" mnemonicParsing="false" onAction="#onConnect" prefHeight="25.0" prefWidth="144.0" style="-fx-border-color: black;" text="Połącz" AnchorPane.bottomAnchor="339.0" AnchorPane.rightAnchor="14.0">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Button>
+                              <Label layoutX="18.0" layoutY="395.0" prefHeight="17.0" prefWidth="83.0" text="Argumenty:" textAlignment="RIGHT" AnchorPane.bottomAnchor="18.0" AnchorPane.leftAnchor="18.0" />
+                              <Button fx:id="btnArgsCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" layoutX="498.0" layoutY="327.0" mnemonicParsing="false" onAction="#onPassArgs" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="498.0" />
+                              <Button fx:id="btAbortCommand" alignment="CENTER" contentDisplay="CENTER" layoutX="679.0" layoutY="326.0" mnemonicParsing="false" onAction="#onAbortCommand" prefHeight="27.0" prefWidth="236.0" style="-fx-border-color: black;" text="Wymuś zatrzymanie polecenia" AnchorPane.bottomAnchor="13.0" AnchorPane.rightAnchor="18.0">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                                 <tooltip>
+                                    <Tooltip text="Przerywa działanie i zrywa połaczenie." />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="btnPushToBG" alignment="CENTER" contentDisplay="CENTER" layoutX="606.0" layoutY="326.0" mnemonicParsing="false" onAction="#onBgCommand" prefHeight="27.0" prefWidth="57.0" style="-fx-border-color: black;" text="&amp;" AnchorPane.bottomAnchor="13.0" AnchorPane.rightAnchor="270.0">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                                 <tooltip>
+                                    <Tooltip text="Komenda  spycha zadanie do pracy w tle." />
+                                 </tooltip>
+                              </Button>
                            </children>
                         </AnchorPane>
                      </children>
@@ -166,13 +173,21 @@
                               <Label layoutX="133.0" layoutY="39.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="256.0" style="-fx-alignment: CENTER;" text="Maksymalny czas dla zadania SUDO:" textAlignment="JUSTIFY" wrapText="true" />
                               <TextField fx:id="txtSshTm" layoutX="389.0" layoutY="2.0" onAction="#sshTmChanged" onInputMethodTextChanged="#sshTmChanged" />
                               <TextField fx:id="txtSudoTm" layoutX="389.0" layoutY="35.0" onAction="#sudoTmChanged" onInputMethodTextChanged="#sshTmChanged" />
-                              <CheckBox fx:id="chkHistorySave" contentDisplay="RIGHT" graphicTextGap="11.0" layoutX="298.0" layoutY="73.0" mnemonicParsing="false" onAction="#setHistorySave" text="Zapamiętaj historię wpisywanych poleceń" AnchorPane.leftAnchor="298.0" AnchorPane.topAnchor="73.0" />
-                              <Button layoutX="416.0" layoutY="112.0" mnemonicParsing="false" onAction="#saveSettings" prefHeight="25.0" prefWidth="122.0" text="Zapisz zmiany" />
+                              <CheckBox fx:id="chkHistorySave" contentDisplay="RIGHT" graphicTextGap="11.0" layoutX="298.0" layoutY="142.0" mnemonicParsing="false" onAction="#setHistorySave" text="Zapamiętaj historię wpisywanych poleceń" AnchorPane.leftAnchor="298.0" AnchorPane.topAnchor="142.0" />
+                              <Button layoutX="416.0" layoutY="181.0" mnemonicParsing="false" onAction="#saveSettings" prefHeight="25.0" prefWidth="122.0" text="Zapisz zmiany" />
                               <Text layoutX="220.0" layoutY="226.0" text="Wprowadż jednorazowo login i haso dla wszystkich maszyn." />
                               <Label layoutX="298.0" layoutY="255.0" text="Login:" />
                               <TextField fx:id="loginField" layoutX="389.0" layoutY="251.0" />
                               <Label layoutX="298.0" layoutY="288.0" text="Hasło:" />
+                              <Label layoutX="133.0" layoutY="71.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="256.0" style="-fx-alignment: CENTER;" text="Wielkość bufora danych konsoli:" textAlignment="JUSTIFY" wrapText="true" />
                               <PasswordField fx:id="passwordField" layoutX="389.0" layoutY="284.0" />
+                              <TextField fx:id="txtBufferSize" layoutX="389.0" layoutY="67.0" onAction="#sudoTmChanged" onInputMethodTextChanged="#sshTmChanged" />
+                              <Label layoutX="550.0" layoutY="71.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="65.0" style="-fx-alignment: CENTER;" text="[kB]" textAlignment="JUSTIFY" wrapText="true" />
+                              <Label layoutX="550.0" layoutY="39.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="65.0" style="-fx-alignment: CENTER;" text="[ms]" textAlignment="JUSTIFY" wrapText="true" />
+                              <Label layoutX="550.0" layoutY="6.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="65.0" style="-fx-alignment: CENTER;" text="[ms]" textAlignment="JUSTIFY" wrapText="true" />
+                              <Label layoutX="112.0" layoutY="104.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="277.0" style="-fx-alignment: CENTER;" text="Częstotliwość kontroli stanu maszyn:" textAlignment="JUSTIFY" wrapText="true" />
+                              <TextField fx:id="txtPingDelay" layoutX="389.0" layoutY="100.0" onAction="#sudoTmChanged" onInputMethodTextChanged="#sshTmChanged" />
+                              <Label layoutX="550.0" layoutY="104.0" lineSpacing="10.0" prefHeight="17.0" prefWidth="65.0" style="-fx-alignment: CENTER;" text="[ms]" textAlignment="JUSTIFY" wrapText="true" />
                            </children>
                         </AnchorPane>
                      </children>

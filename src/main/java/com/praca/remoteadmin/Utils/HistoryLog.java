@@ -55,7 +55,7 @@ public class HistoryLog {
             return hashtext;
         } catch (NoSuchAlgorithmException e) {
             ConnectionHelper.log.error(e.getMessage());
-            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }

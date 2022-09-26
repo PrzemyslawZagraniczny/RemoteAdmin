@@ -9,8 +9,27 @@ import java.io.*;
 public class Settings implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Integer sshTm = 10000;      //10000 ms domyślnie
-    private Integer sudoTm = 30000;      //10000 ms domyślnie
+    private Integer sshTm = 10000;          //10000 ms domyślnie
+    private Integer sudoTm = 30000;          //10000 ms domyślnie
+    private Long bufferSize = 1024 * 1000L;    //1MB domyślnego bufora dla każdej z konsol
+    private Integer pingDelay = 10000;         //10 sek domyślnie
+
+    public Long getBufferSize() {
+        return bufferSize;
+    }
+
+    public void setBufferSize(Long bufferSize) {
+        this.bufferSize = bufferSize;
+    }
+
+    public Integer getPingDelay() {
+        return pingDelay;
+    }
+
+    public void setPingDelay(Integer pingDelay) {
+        this.pingDelay = pingDelay;
+    }
+
     private Boolean historyOn = true;    //czy zapamiętywać historię poleceń
 
     public Boolean getHistoryOn() {
@@ -38,6 +57,9 @@ public class Settings implements Serializable {
             ConnectionHelper.sshConnectionTimeOut = settings.sshTm;
             ConnectionHelper.sudoConnectionTimeOut = settings.sudoTm;
             ConnectionHelper.historySave = settings.historyOn;
+            ConnectionHelper.pingDelay = settings.pingDelay;
+            ConnectionHelper.bufferSize = settings.bufferSize;
+
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
@@ -47,11 +69,9 @@ public class Settings implements Serializable {
 
     public static void saveData() {
         ObjectMapper objectMapper = new ObjectMapper();
-        InputStream fin = null;
 
         try {
             File fout = new File("settings.json");
-            //System.out.println(fout);
             Settings settings = new Settings(ConnectionHelper.sshConnectionTimeOut,ConnectionHelper.sudoConnectionTimeOut);
             objectMapper.writeValue(fout, settings);
 

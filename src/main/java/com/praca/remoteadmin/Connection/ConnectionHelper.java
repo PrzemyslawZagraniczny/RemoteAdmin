@@ -33,11 +33,14 @@ public class ConnectionHelper {
     public static int sshConnectionTimeOut = 10000;    //10 sekund
     public static int sudoConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;
-    public static String defaultCommand = "ls -al";//"sudo printenv SUDO_USER";//"set|grep SSH";//"ls -al";
+    public static String defaultCommand = "ps -ax";//"./tmp.sh";//"ls -al";//"sudo printenv SUDO_USER";//"set|grep SSH";//"ls -al";
     public static String defaultLogin = "";
     public static String defaultPassword = "";
     public static boolean historySave = false;
     public static int mask[] = {127, 191, 256}  ;    //maski dla klas A, B, C
+    public static long bufferSize;
+    public static int pingDelay;
+    public static int pingTimeout = 5000;   //[ms]
 
     //uczyń konstruktor prywatnym aby uniemożliwić utworzenie instancji obiektu tej klasy
     private ConnectionHelper() {
