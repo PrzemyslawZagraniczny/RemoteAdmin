@@ -85,10 +85,22 @@ public class AddComputersDialog {
     public AddComputersDialog(ObservableList<LabRoom> sale, LabRoom room, ISaveDataObserver observer) {
 
         int row = 0;
+        TextField nameTextField = new TextField("");
         TextField ipTextField = new TextField("");
         TextField ipTextField2 = new TextField("");
         javafx.scene.control.Dialog<String> dialog = new Dialog<>();
 
+
+        Button btnAddCompyterByName = new Button();
+        btnAddCompyterByName.setText("Dodaj");
+        btnAddCompyterByName.setOnAction(actionEvent -> {
+            String name = nameTextField.getText();
+            if(name.trim().length() <= 0) return;
+            Computer comp = new Computer(room, "Komputer", name, StatusType.UNKNOWN);
+            comps.add(comp);
+            table.getItems().add(comp);
+            btnOk.setDisable(false);
+        });
 
         Button btnAddIPAddress = new Button();
         btnAddIPAddress.setText("Dodaj++");
@@ -137,6 +149,7 @@ public class AddComputersDialog {
                             Thread.sleep(5);
                         } catch (InterruptedException e) {
                             ConnectionHelper.log.error(e.getMessage());
+                            e.printStackTrace();
                         }
 
                         if(text.lastIndexOf('.') == text.indexOf('.') && text.indexOf('.') >= 0) {
@@ -169,6 +182,7 @@ public class AddComputersDialog {
                             Thread.sleep(5);
                         } catch (InterruptedException e) {
                             ConnectionHelper.log.error(e.getMessage());
+                            e.printStackTrace();
                         }
                         ipTextField2.appendText(".");
                     });
@@ -196,6 +210,10 @@ public class AddComputersDialog {
 
 
         grid.add(addressLabel, 0, row);
+
+        nameTextField.setPromptText("Wprowadź nazwę DNS skomputera");
+        grid.add(nameTextField, 0, ++row);
+        grid.add(btnAddCompyterByName, 1, row);
 
         grid.add(new Label("Od:"), 0, ++row);
         grid.add(ipTextField, 0, ++row);
@@ -251,6 +269,8 @@ public class AddComputersDialog {
                             Platform.runLater(() -> c.setSelected(bRet));
                         } catch (IOException e) {
                             ConnectionHelper.log.error(e.getMessage());
+                            //e.printStackTrace();
+                            c.setSelected(false);
                         }
 
 
