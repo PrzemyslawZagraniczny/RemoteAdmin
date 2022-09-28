@@ -390,35 +390,35 @@ public class MainController implements ISaveDataObserver, Runnable {
                     int cntConnected = 0;
                     synchronized (ssh)
                     {        //synchronizuj na maszynach (gdyby ktoś próbował kliknąć checkboxa obok maszyny)
-                            for (CommandCallable comp : ssh) {
-                                if (comp.comp.isSelected()) {
-                                    cntSelected++;
-                                }
-                                if ( comp.comp.getStat() == StatusType.CONNECTED)
-                                    cntConnected++;
+                        for (CommandCallable comp : ssh) {
+                            if (comp.comp.isSelected()) {
+                                cntSelected++;
                             }
-                        }
-                        ConnectionHelper.log.info("Established connection to " + cntConnected+"/"+cntSelected + " hosts.");
-                        if(cntConnected <= 0) {
-                            cntConnected = 0;
-                            postDisconnect();
-                        }
-                        else {
-                            //wątek Pinga aktywnych maszyn
-                            pingThread = new Thread(this);
-                            pingThread.setPriority(MIN_PRIORITY);
-                            pingThread.start();
-
-                            Platform.runLater(() -> {
-                                consoleOutput.clear();              //czyść okienko konsoli wyjścia
-                                btnExecCmd.setDisable(false);       //gdyby było przyblokowane
-                                btConnect.setDisable(false);
-                                selectCol.setEditable(!true);
-                                selectRoomCol.setEditable(!true);
-                            });
+                            if ( comp.comp.getStat() == StatusType.CONNECTED)
+                                cntConnected++;
                         }
                     }
-                    break;
+                    ConnectionHelper.log.info("Established connection to " + cntConnected+"/"+cntSelected + " hosts.");
+                    if(cntConnected <= 0) {
+                        cntConnected = 0;
+                        postDisconnect();
+                    }
+                    else {
+                        //wątek Pinga aktywnych maszyn
+                        pingThread = new Thread(this);
+                        pingThread.setPriority(MIN_PRIORITY);
+                        pingThread.start();
+
+                        Platform.runLater(() -> {
+                            consoleOutput.clear();              //czyść okienko konsoli wyjścia
+                            btnExecCmd.setDisable(false);       //gdyby było przyblokowane
+                            btConnect.setDisable(false);
+                            selectCol.setEditable(!true);
+                            selectRoomCol.setEditable(!true);
+                        });
+                    }
+                }
+                break;
                 case SENDING_CMD:
                     Platform.runLater(() -> btnExecCmd.setDisable(!true));
                     break;

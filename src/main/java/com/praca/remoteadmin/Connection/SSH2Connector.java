@@ -283,7 +283,6 @@ public class SSH2Connector implements IGenericConnector{
 //                        return;
 //                    }
                     computer.refresh();
-                    System.err.print("TIK");
                     Thread.sleep(sleepTm);
                     computer.setProgressStatus(computer.getProgressStatus() + sleepTm/(double)timeOut);
                 }catch (NullPointerException e) {

@@ -15,18 +15,21 @@ public class ConsoleCaptureOutput extends OutputStream {
     public ConsoleCaptureOutput(TextArea ta) {
         this.txt = ta;
         Platform.runLater(() ->{
-            txt.setWrapText(true);
-            txt.setEditable(false);
-            ta.clear();
+            synchronized (txt) {
+                txt.setWrapText(true);
+                txt.setEditable(false);
+                txt.clear();
+            }
         });
     }
 
-
     public void writeAll(String str) {
         Platform.runLater(() -> {
-            txt.appendText(str);
-            txt.requestFocus();
-            txt.end();
+            synchronized (txt) {
+                txt.setText(str);//txt.appendText(str);
+                txt.requestFocus();
+                txt.end();
+            }
         });
     }
 
