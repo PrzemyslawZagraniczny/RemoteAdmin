@@ -4,11 +4,13 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
+import com.praca.remoteadmin.GUI.MessageBoxTask;
 import com.praca.remoteadmin.Model.Computer;
 import com.praca.remoteadmin.Model.LabRoom;
 import com.praca.remoteadmin.Model.StatusType;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -26,19 +28,27 @@ public class DataLoaderFactory {
         switch (df) {
                 case JSON:
                     ObjectMapper mapper = new ObjectMapper();
-                    InputStream fileInputStream = null;
 
                     try {
-                        fileInputStream = new FileInputStream("data.json");
-                        LabRoom[] sale = (LabRoom[])mapper.readValue(fileInputStream, LabRoom[].class);
-                        data = FXCollections.observableArrayList(sale);
-                        fileInputStream.close();
+
+                        File file = new File("data.json");
+                        if(!file.exists()) {
+                            if(!file.createNewFile()) {
+                                //TODO: komunikat o tym, że ni da sie utworzyc pliku
+                            }
+                            return  FXCollections.observableArrayList();
+                        }
+                        else {
+                            if(file.length() <= 0)      // pusty plik nie ma co mapować
+                                return  FXCollections.observableArrayList();
+                            LabRoom[] sale = (LabRoom[])mapper.readValue(file, LabRoom[].class);
+                            data = FXCollections.observableArrayList(sale);
+                        }
                         break;
-                    } catch (FileNotFoundException var9) {
-                        ConnectionHelper.log.error(var9);
-                        var9.printStackTrace();
+
                     } catch (JsonMappingException var10) {
                         ConnectionHelper.log.error(var10);
+                        new MessageBoxTask( "Plik <<data.json>> posiada uszkodzone dane.","Uwaga", Alert.AlertType.ERROR).run();
                         var10.printStackTrace();
                     } catch (JsonParseException var11) {
                         ConnectionHelper.log.error(var11);

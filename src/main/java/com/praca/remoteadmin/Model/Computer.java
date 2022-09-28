@@ -8,9 +8,8 @@ import com.praca.remoteadmin.Utils.ExitStatusMapper;
 import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
 
-import java.awt.*;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -65,11 +64,6 @@ public class Computer {
     }
 
     //do zapisu danych z SSH
-    @JsonIgnore
-    PrintStream ps = null;
-    @JsonIgnore
-    ByteArrayOutputStream bs = null;
-
 
     @JsonIgnore
     LabRoom parent = null;
@@ -116,7 +110,7 @@ public class Computer {
     }
 
     public void setProgressStatus(double progressStatus) {
-        this.progressStatus.set(progressStatus);
+        Platform.runLater(() -> this.progressStatus.set(progressStatus));
     }
 
     @JsonIgnore
@@ -139,8 +133,9 @@ public class Computer {
         }
     }
 
-    public PrintStream getPs() {
-        return ps;
+    @JsonIgnore
+    public ConsoleCaptureOutput getPs() {
+        return out;
     }
 
     public Computer() {
@@ -187,7 +182,6 @@ public class Computer {
             {
                 if (out != null) {
                     writeToConsole();
-
                 }
             }
 
@@ -274,7 +268,9 @@ public class Computer {
         this.stat = stat;
         switch(stat) {
             case OFFLINE:
+            case DISCONNECTED:
             case TIME_OUT:
+            case CONNECTING:
             case UNKNOWN:
                 clearCmdExitStatus();
                 break;
@@ -287,43 +283,34 @@ public class Computer {
     }
 
     public void clearBuffer() {
-        bs = new ByteArrayOutputStream((int) ConnectionHelper.bufferSize);
-        ps = new PrintStream(bs);
+        if(out != null)
+            out.clear();
     }
 
     public void writeAll(String str) {
-        synchronized (ps) {
-            ps.write(str.getBytes(),0, str.length());
-            writeToConsole();
-        }
+            out.writeAll(str);
+            //refresh();
+            //writeToConsole();
     }
 
     public void write(byte[] buf, int i) {
-        synchronized (ps) {
-            ps.write(buf, 0, i);
-            writeToConsole();
-      }
+        try {
+            out.write(buf,0,i);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+//          writeToConsole();
     }
 
     private void writeToConsole() {
         if(out != null && printout.get()) {
-            Platform.runLater(() -> {
-                try {
-                    out.clear();
-                    ps.flush();
-                    bs.flush();
-                    out.writeAll(bs.toString(Charset.defaultCharset()));
-                    out.flush();
-                } catch (IOException e) {
-                    ConnectionHelper.log.error(e.getMessage());
-                }
-            });
+            out.printToConsole();
         }
     }
 
     public void refresh() {
-        //update.set(!update.get());
-        printout.set(printout.get());
+        update.set(!update.get());
+        //printout.set(printout.get());
     }
 
     public void clearCmdExitStatus() {

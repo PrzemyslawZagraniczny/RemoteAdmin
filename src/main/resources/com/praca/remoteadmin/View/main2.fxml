@@ -131,7 +131,7 @@
                         <TextField fx:id="cmdLine" maxHeight="1.7976931348623157E308" minWidth="30.0" prefHeight="25.0" prefWidth="649.0" promptText="Wiersz poleceń" />
                         <Label prefHeight="17.0" prefWidth="127.0" text="Linia poleceń:" textAlignment="RIGHT" />
                         <Button fx:id="btnExecCmd" alignment="CENTER" contentDisplay="CENTER" defaultButton="true" mnemonicParsing="false" onAction="#onExecuteCommand" prefHeight="25.0" prefWidth="49.0" text="&gt;&gt;" />
-                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConsolClear" prefHeight="25.0" prefWidth="161.0" text="Wyczyść konsolę" />
+                        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConsoleClear" prefHeight="25.0" prefWidth="161.0" text="Wyczyść konsolę" />
                         <Button fx:id="btConnect" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#onConnect" prefHeight="25.0" prefWidth="144.0" style="-fx-border-color: black;" text="Połącz">
                            <font>
                               <Font name="System Bold" size="12.0" />

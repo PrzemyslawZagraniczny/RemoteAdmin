@@ -24,35 +24,28 @@ public class ConsoleCaptureOutput extends OutputStream {
     }
 
     public void writeAll(String str) {
+        buffer.append(str);
+
+    }
+
+    public void printToConsole() {
         Platform.runLater(() -> {
             synchronized (txt) {
-                txt.setText(str);//txt.appendText(str);
+                txt.setText(buffer.toString());//txt.appendText(str);
                 txt.requestFocus();
                 txt.end();
             }
         });
     }
 
-        @Override
+    @Override
     public void write(int b) {
-        char c = (char)((b + 256) % 256);
-        buffer.append(c);
-//        if(c == '$')
-        {
-            buffer = new StringBuffer();
-        }
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                txt.appendText(c+"");
-                txt.requestFocus();
-                txt.end();
-            }
-        });
+        buffer.append((char)b);
     }
 
     public void clear() {
-        txt.clear();
+        if(txt != null)
+            txt.clear();
+        buffer = new StringBuffer();
     }
 }

@@ -1,6 +1,7 @@
 package com.praca.remoteadmin;
 
 import com.praca.remoteadmin.Connection.ConnectionHelper;
+import com.praca.remoteadmin.Controller.MainController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -28,17 +29,20 @@ public class MainApplication extends Application {
         Scene scene = new Scene(parent, 1024, 768);
         stage.setMinWidth(640);
         stage.setMinHeight(610);
-        stage.setMaxHeight(768);
+        //stage.setMaxHeight(768);
         scene.getStylesheets().add
                 (MainApplication.class.getResource("css/main.css").toExternalForm());
         stage.setTitle("RemoteAdmin");
 
         stage.setScene(scene);
         stage.show();
+        ((MainController) fxmlLoader.getController()).setStage(stage);
         ConnectionHelper.log.info("App successfully started.");
     }
+
     @Override
     public void stop(){
+
         ConnectionHelper.log.info("App successfully closed.");
         ConnectionHelper.log.info("************************");
     }

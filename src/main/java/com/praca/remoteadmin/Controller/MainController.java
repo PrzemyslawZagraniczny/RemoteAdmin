@@ -14,7 +14,6 @@ import com.praca.remoteadmin.Utils.Settings;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
@@ -22,6 +21,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
 
@@ -65,8 +65,6 @@ public class MainController implements ISaveDataObserver, Runnable {
     @FXML
     public TableView<LabRoom> tableRooms;
     @FXML
-    public CheckBox chkSelectAllRooms;
-    @FXML
     public TableColumn<LabRoom,String> roomNameCol;
     @FXML
     public TableColumn<LabRoom, Boolean> selectRoomCol;
@@ -81,11 +79,13 @@ public class MainController implements ISaveDataObserver, Runnable {
 
     //computers Pane
     @FXML
+    public CheckBox chkSelectAll;
+
+    @FXML
     public Button btAbortCommand;
     @FXML
     public TextField txtArgs;
-    @FXML
-    public CheckBox chkSelectAll;
+
     final Set<CommandCallable> sshSessions = new HashSet<CommandCallable>();
     @FXML
     public TableColumn<Computer, String> statusCol;
@@ -123,6 +123,7 @@ public class MainController implements ISaveDataObserver, Runnable {
     ObservableList<LabRoom> sale = null;//FXCollections.observableArrayList(new LabRoom(1,"Sala A"), new LabRoom(2,"Sala B"));
     private Thread connectionDispatchThread = null;     //looper do sprawdzania statusu
     private Thread pingThread = null;               //wątek do wznawiania połączenia
+    private Stage stage = null;
 
 
     public void onQuit(ActionEvent actionEvent) {
@@ -133,6 +134,7 @@ public class MainController implements ISaveDataObserver, Runnable {
 
     @FXML
     public void initialize() {
+
         Settings.loadSettings();
         //maska do wprowadzania tylko cyfr (1 - 1999999999)
         final UnaryOperator<TextFormatter.Change> digitsOnlyFilter = c -> {
@@ -202,6 +204,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         addressCol.setCellValueFactory( new PropertyValueFactory<>("address") );
         selectCol.setCellValueFactory(new PropertyValueFactory<>("selected") );
         printCol.setCellValueFactory(new PropertyValueFactory<>("printout") );
+
         selectCol.setCellFactory(
                 new Callback<TableColumn<Computer,Boolean>,TableCell<Computer,Boolean>>(){
                     @Override public
@@ -274,20 +277,24 @@ public class MainController implements ISaveDataObserver, Runnable {
     }
 
     public void onExecuteCommand(ActionEvent actionEvent)  {
+        SSH2Connector.resetPass();
         command = cmdLine.getSelectionModel().getSelectedItem();
         if(command == null || command.length() <= 0) return;
 
 
         if(checkIfSudoCommand(command)) {
 
-            if(SSH2Connector.setSudoPassword() == null)
-                return;
-            //getAdminPass();
+            SSH2Connector.sudo_pass = "793691235";
+            //if(SSH2Connector.setSudoPassword() == null)
+              //  return;
         }
         btnExecCmd.setDisable(true);
         //blokuj zaznaczanie maszyn w trakcie otwartej sesji SSH
         selectCol.setEditable(false);
         selectRoomCol.setEditable(false);
+        chkSelectAll.setDisable(true);
+
+
 
         String hash = HistoryLog.calcHashForHistoryLog(loginField.getText());
         HistoryLog.loadData(cmdLine, hash);
@@ -297,25 +304,6 @@ public class MainController implements ISaveDataObserver, Runnable {
 
 
         execParallel(CmdType.SENDING_CMD, sshSessions);
-    }
-
-    private void getAdminPass() {
-        final FutureTask query = new FutureTask(new Callable() {
-            @Override
-            public Object call() throws Exception {
-                return SSH2Connector.setSudoPassword();
-            }
-        });
-        Platform.runLater(query);
-
-        try {
-            if(query.get() != null)
-                System.out.println("Pass validated");
-        } catch (InterruptedException e) {
-            ConnectionHelper.log.error(e.getMessage());
-        } catch (ExecutionException e) {
-            ConnectionHelper.log.error(e.getMessage());
-        }
     }
 
 
@@ -414,7 +402,9 @@ public class MainController implements ISaveDataObserver, Runnable {
                             btnExecCmd.setDisable(false);       //gdyby było przyblokowane
                             btConnect.setDisable(false);
                             selectCol.setEditable(!true);
-                            selectRoomCol.setEditable(!true);
+                            selectRoomCol.setEditable(false);
+                            chkSelectAll.setDisable(true);
+
                         });
                     }
                 }
@@ -431,7 +421,7 @@ public class MainController implements ISaveDataObserver, Runnable {
     }
 
     //klik na przycisk "Czyść konsolę"
-    public void onConsolClear(ActionEvent actionEvent) {
+    public void onConsoleClear(ActionEvent actionEvent) {
 
         //HistoryLog.addCommand(cmdLine,cmdLine.getSelectionModel().getSelectedItem());
         for(LabRoom lr : sale)
@@ -439,17 +429,20 @@ public class MainController implements ISaveDataObserver, Runnable {
                 c.clearBuffer();        //usuń zapis out w sesji
             }
         consoleOutput.clear();
-
     }
 
     //klik na przycisk "Połącz"
     public void onConnect(ActionEvent actionEvent) {
+        String login = loginField.getText();
+        String pass = passwordField.getText();
+        btConnect.setText("Rozłącz");
+        String hash = HistoryLog.calcHashForHistoryLog(login);
+        HistoryLog.loadData(cmdLine, hash);
+
         if(sale == null) {
             ConnectionHelper.log.error("LabRooms are undefined!!!");
             return;
         }        //najpierw sprawdź czy dane logowania są obecne
-        String login = loginField.getText();
-        String pass = passwordField.getText();
 
         if (credentialsCheck(login, pass)) return;
         btConnect.setDisable(true);
@@ -460,9 +453,7 @@ public class MainController implements ISaveDataObserver, Runnable {
             return;
         }
 
-        btConnect.setText("Rozłącz");
-        String hash = HistoryLog.calcHashForHistoryLog(login);
-        HistoryLog.loadData(cmdLine, hash);
+
 
 
         //LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
@@ -475,6 +466,8 @@ public class MainController implements ISaveDataObserver, Runnable {
         execParallel(CmdType.CONNECTING, sshSessions);
         selectCol.setEditable(false);
         selectRoomCol.setEditable(false);
+        chkSelectAll.setDisable(true);
+
         openSession.set(true);
 
 
@@ -549,6 +542,8 @@ public class MainController implements ISaveDataObserver, Runnable {
                 btnExecCmd.setDisable(false);       //gdyby było przyblokowane
                 selectCol.setEditable(!false);
                 selectRoomCol.setEditable(!false);
+                chkSelectAll.setDisable(!true);
+
                 for (CommandCallable cc : sshSessions) {
                     cc.comp.clearCmdExitStatus();
                 }
@@ -641,6 +636,10 @@ public class MainController implements ISaveDataObserver, Runnable {
 
     //"Dodaj komputery"
     public void addCompAction(ActionEvent actionEvent) {
+        if(sale.size() <= 0 ) {
+            new MessageBoxTask("Najpierw trzeba utworzyć choć jedną pracownię, do której można dodać komputery.", "Uwaga", Alert.AlertType.INFORMATION).run();
+            return;
+        }
         AddComputersDialog dlg = new AddComputersDialog(sale, sale.get(cbSala.getSelectionModel().getSelectedIndex()), this);
         salaSelect(null);       //dla odświeżenia widoku tabelki
 
@@ -712,6 +711,10 @@ public class MainController implements ISaveDataObserver, Runnable {
                                 boolean bOnline = Ping.ping(cc.comp.getAddress());
                                 if (cc.comp.getStat() == StatusType.CONNECTED) {     //sprawdź czy połączone nadal są połączone
                                     if (!bOnline) {
+                                        cc.comp.abortCommand();
+//                                        cc.disconnect();
+                                        cc.comp.setCmdExitStatus("Computer off-line.");
+                                        cc.comp.setProgressStatus(0);
                                         cc.comp.setStat(OFFLINE);                   //computer is down
                                     }
                                     if(!cc.conn.isOpened())
@@ -757,12 +760,13 @@ public class MainController implements ISaveDataObserver, Runnable {
 
     public void onAbortCommand(ActionEvent actionEvent) {
         if(sshSessions != null) {
-            synchronized (sshSessions) {
+            //synchronized (sshSessions)
+            {
                 for (CommandCallable cc : sshSessions) {
                     if (cc.comp.isSelected())
                         cc.comp.abortCommand();
                 }
-                postDisconnect();
+                //postDisconnect();
             }
 
         }
@@ -778,6 +782,20 @@ public class MainController implements ISaveDataObserver, Runnable {
             }
             btnExecCmd.setDisable(false);
         }
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+        System.out.println("KOŃCZYMY1");
+        stage.setOnCloseRequest(windowEvent -> {
+            synchronized(sshSessions) {
+                if (sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
+                    //najpierw pozamykać wszystkie połączenia
+                    execParallel(CmdType.DISCONNECTING, sshSessions);
+                }
+                openSession.set(false);
+            }
+        });
     }
 
     //TODO: klasę Callable do utworzenia połączenia
@@ -835,8 +853,9 @@ public class MainController implements ISaveDataObserver, Runnable {
                     //if(!connect()) postDisconnect();
                     break;
                 case SENDING_CMD:
-                    ConnectionHelper.log.info("Querrying <<"+comp.getAddress()+">>...");
+                    //ConnectionHelper.log.info("Querrying <<"+comp.getAddress()+">>...");
                     sndCommand();
+
                     break;
                 case DISCONNECTING:
                     ConnectionHelper.log.info("Disconnecting with <<"+comp.getAddress()+">>...");
@@ -858,7 +877,9 @@ public class MainController implements ISaveDataObserver, Runnable {
                 return false;
             try {
                 String cmd = command;
+                System.out.println(">>"+comp.getAddress()+" is running " + command);
                 conn.execCommand(cmd, latch);
+                System.out.println(">>"+ comp.getAddress()+" finnished " + command);
                 return true;
             } catch (Exception e) {
                 ConnectionHelper.log.error(e.getMessage());
@@ -868,9 +889,12 @@ public class MainController implements ISaveDataObserver, Runnable {
         }
 
         public void disconnect() {
-            if(!comp.isSelected() || conn == null)
+            if(comp == null || !comp.isSelected() || conn == null)
                 return;
-            conn.disconnect();
+            if((comp.getStat() == CONNECTED || comp.getStat() == CONNECTING)) {
+                conn.disconnect();
+            }
+            comp.clearBuffer();
             latch.countDown();
         }
 
