@@ -2,6 +2,7 @@ package com.praca.remoteadmin.Utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
+import javafx.collections.FXCollections;
 
 import java.io.*;
 
@@ -52,18 +53,26 @@ public class Settings implements Serializable {
         File fin = null;
 
         try {
-            fin = new File("settings.json");
-            Settings settings = objectMapper.readValue(fin, Settings.class);
-            ConnectionHelper.sshConnectionTimeOut = settings.sshTm;
-            ConnectionHelper.sudoConnectionTimeOut = settings.sudoTm;
-            ConnectionHelper.historySave = settings.historyOn;
-            ConnectionHelper.pingDelay = settings.pingDelay;
-            ConnectionHelper.bufferSize = settings.bufferSize;
 
+            fin = new File("settings.json");
+
+            if(!fin.exists() || fin.length() <= 0) {
+                File fout = new File("settings.json");
+                Settings settings = new Settings(ConnectionHelper.sshConnectionTimeOut,ConnectionHelper.sudoConnectionTimeOut);
+                objectMapper.writeValue(fout, settings);
+            }
+            else {
+                Settings settings = objectMapper.readValue(fin, Settings.class);
+                ConnectionHelper.sshConnectionTimeOut = settings.sshTm;
+                ConnectionHelper.sudoConnectionTimeOut = settings.sudoTm;
+                ConnectionHelper.historySave = settings.historyOn;
+                ConnectionHelper.pingDelay = settings.pingDelay;
+                ConnectionHelper.bufferSize = settings.bufferSize;
+            }
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -77,7 +86,7 @@ public class Settings implements Serializable {
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
     }

@@ -1,1 +1,1 @@
-{"sshTm":5000,"sudoTm":10000, "historyOn": true, "bufferSize": 1024000, "pingDelay": 5000}
+{"sshTm":4000,"sudoTm":10000,"bufferSize":1024000,"pingDelay":10000,"historyOn":true}
