@@ -148,7 +148,8 @@ public class SSH2Connector implements IGenericConnector{
 
     public static synchronized String setSudoPassword(){
         //aby nie powtarzać dla każdej maszyny
-        synchronized (sudo_pass) {
+        //synchronized (sudo_pass)
+        {
             if (sudo_pass.length() > 0)
                 return null;
 

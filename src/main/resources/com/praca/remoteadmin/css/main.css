@@ -26,11 +26,6 @@ root {
   -fx-font-weight: bold;
 }
 
-partiallySelected {
-    -fx-font-size: 14px;
-    -fx-color: rgba(255,55,55,.5);
-    -fx-font-weight: bold;
-}
 .table-view .table-column {
     -fx-alignment: CENTER;
 }
@@ -62,9 +57,7 @@ partiallySelected {
     -fx-background-color: linear-gradient(#555555,#888888);
     -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
 }
-.button:selected {
-    -fx-text-fill: #DDDDFF;
-}
+
 .button:hover {
     -fx-background-color: linear-gradient(#2A5058, #61a2b1);
 }

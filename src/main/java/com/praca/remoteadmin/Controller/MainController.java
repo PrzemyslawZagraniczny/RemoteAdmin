@@ -572,13 +572,13 @@ public class MainController implements ISaveDataObserver, Runnable {
         boolean bNewState = chkSelectAll.isSelected();
         //chkSelectAll.setStyle("-fx-color: rgba(255,255,255,.5);-fx-opacity: 0.60;");
         for (Computer comp: room.getComputers()) {
-            if(comp.getStat() == StatusType.CONNECTED) {
-                //TODO: rozłącz i wyłącz z kolejnych zadań
-
-            }
-            else {
-
-            }
+//            if(comp.getStat() == StatusType.CONNECTED) {
+//                //TODO: rozłącz i wyłącz z kolejnych zadań
+//
+//            }
+//            else {
+//
+//            }
             comp.setSelected(bNewState);
 
         }

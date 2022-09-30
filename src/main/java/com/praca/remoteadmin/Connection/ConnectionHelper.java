@@ -38,7 +38,7 @@ public class ConnectionHelper {
     public static String defaultPassword = "";
     public static boolean historySave = false;
     public static int mask[] = {127, 191, 256}  ;    //maski dla klas A, B, C
-    public static long bufferSize = 1024 * 100;
+    public static long bufferSize = 1024 * 100L;
     public static int pingDelay;
     public static int pingTimeout = 5000;   //[ms]
 
