@@ -5,13 +5,16 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
 
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 public class ConsoleCaptureOutput extends OutputStream {
     TextArea txt = null;
-    StringBuffer buffer = new StringBuffer();
+    //StringBuffer buffer = new StringBuffer();
+    ByteArrayOutputStream bs = new ByteArrayOutputStream(1000);
 
     public ConsoleCaptureOutput(TextArea ta) {
         this.txt = ta;
@@ -25,14 +28,17 @@ public class ConsoleCaptureOutput extends OutputStream {
     }
 
     public void writeAll(String str) {
-        //buffer.append(str.getBytes(StandardCharsets.UTF_8));
-        buffer.append(str);
+        try {
+            bs.write(str.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void printToConsole() {
         Platform.runLater(() -> {
             synchronized (txt) {
-                txt.setText(buffer.toString());//txt.appendText(str);
+                txt.setText(bs.toString());//txt.appendText(str);
                 txt.requestFocus();
                 txt.end();
             }
@@ -41,12 +47,12 @@ public class ConsoleCaptureOutput extends OutputStream {
 
     @Override
     public void write(int b) {
-        buffer.append((char)b);
+        bs.write(b);
     }
 
     public void clear() {
         if(txt != null)
             txt.clear();
-        buffer = new StringBuffer();
+        bs = new ByteArrayOutputStream(1024*10);
     }
 }

@@ -1,5 +1,9 @@
 # RemoteAdmin
 Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zdalnej synchronizachi poleceń na wielu stacjach roboczych.
+
+## wersja 1.5.3
+<li>Obsługa polskich znaków diakrytycznych.</li>
+
 ## wersja 1.5.2
 <li>Dialog hasła do sudo odblokowany</li>
 <li>Naprawiony problem z przyciskiem 'połącz'</li>
