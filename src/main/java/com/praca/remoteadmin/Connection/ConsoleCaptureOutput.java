@@ -7,6 +7,7 @@ import javafx.scene.control.TextInputControl;
 import java.awt.*;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 public class ConsoleCaptureOutput extends OutputStream {
     TextArea txt = null;
@@ -24,8 +25,8 @@ public class ConsoleCaptureOutput extends OutputStream {
     }
 
     public void writeAll(String str) {
+        //buffer.append(str.getBytes(StandardCharsets.UTF_8));
         buffer.append(str);
-
     }
 
     public void printToConsole() {

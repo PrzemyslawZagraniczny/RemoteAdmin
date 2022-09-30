@@ -33,7 +33,7 @@ public class ConnectionHelper {
     public static int sshConnectionTimeOut = 10000;    //10 sekund
     public static int sudoConnectionTimeOut = 10000;    //10 sekund
     public static boolean bRSAKeyFingerprintIgnore = true;
-    public static String defaultCommand = "ps -ax";//"./tmp.sh";//"ls -al";//"sudo printenv SUDO_USER";//"set|grep SSH";//"ls -al";
+    public static String defaultCommand = "sudo ./tmp.sh";//"ls -al";//"sudo printenv SUDO_USER";//"set|grep SSH";//"ls -al";
     public static String defaultLogin = "";
     public static String defaultPassword = "";
     public static boolean historySave = false;

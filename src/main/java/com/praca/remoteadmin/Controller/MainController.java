@@ -284,9 +284,9 @@ public class MainController implements ISaveDataObserver, Runnable {
 
         if(checkIfSudoCommand(command)) {
 
-            SSH2Connector.sudo_pass = "793691235";
-            //if(SSH2Connector.setSudoPassword() == null)
-              //  return;
+            //SSH2Connector.sudo_pass = "793691235!";
+            if(SSH2Connector.setSudoPassword() == null)
+                return;
         }
         btnExecCmd.setDisable(true);
         //blokuj zaznaczanie maszyn w trakcie otwartej sesji SSH
@@ -435,6 +435,8 @@ public class MainController implements ISaveDataObserver, Runnable {
     public void onConnect(ActionEvent actionEvent) {
         String login = loginField.getText();
         String pass = passwordField.getText();
+        if (credentialsCheck(login, pass)) return;
+
         btConnect.setText("Rozłącz");
         String hash = HistoryLog.calcHashForHistoryLog(login);
         HistoryLog.loadData(cmdLine, hash);
@@ -444,7 +446,6 @@ public class MainController implements ISaveDataObserver, Runnable {
             return;
         }        //najpierw sprawdź czy dane logowania są obecne
 
-        if (credentialsCheck(login, pass)) return;
         btConnect.setDisable(true);
         if(sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
 
