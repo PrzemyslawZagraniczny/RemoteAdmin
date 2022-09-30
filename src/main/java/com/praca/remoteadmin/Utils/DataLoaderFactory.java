@@ -92,16 +92,13 @@ public class DataLoaderFactory {
         }
     public static void saveData(ObservableList<LabRoom> data) {
         ObjectMapper objectMapper = new ObjectMapper();
-
-
         try {
             File fout = new File("data.json");
             objectMapper.writeValue(fout, data);
 
-
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
     }

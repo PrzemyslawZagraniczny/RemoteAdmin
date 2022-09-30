@@ -134,6 +134,7 @@ public class MainController implements ISaveDataObserver, Runnable {
 
     @FXML
     public void initialize() {
+        sale = ConnectionHelper.loadData(JSON);
 
         Settings.loadSettings();
         //maska do wprowadzania tylko cyfr (1 - 1999999999)
@@ -204,7 +205,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         addressCol.setCellValueFactory( new PropertyValueFactory<>("address") );
         selectCol.setCellValueFactory(new PropertyValueFactory<>("selected") );
         printCol.setCellValueFactory(new PropertyValueFactory<>("printout") );
-
+        selectCol.setEditable(true);
         selectCol.setCellFactory(
                 new Callback<TableColumn<Computer,Boolean>,TableCell<Computer,Boolean>>(){
                     @Override public
@@ -228,9 +229,6 @@ public class MainController implements ISaveDataObserver, Runnable {
                     }
                 });
 
-
-
-
         cmdStatCol.setCellValueFactory(
                 new PropertyValueFactory<>("cmdExitStatus")
         );
@@ -239,7 +237,8 @@ public class MainController implements ISaveDataObserver, Runnable {
         );
 
 
-        sale = ConnectionHelper.loadData(JSON);
+
+        tableRooms.getItems().addAll(sale);
 
         if(sale == null) {
             //TODO: błąd wczytania (do logera i na ekran)
@@ -264,7 +263,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         else
             System.err.println("Room == null!!");
 
-        tableRooms.getItems().addAll(sale);
+
 
     }
 
@@ -787,7 +786,6 @@ public class MainController implements ISaveDataObserver, Runnable {
 
     public void setStage(Stage stage) {
         this.stage = stage;
-        System.out.println("KOŃCZYMY1");
         stage.setOnCloseRequest(windowEvent -> {
             synchronized(sshSessions) {
                 if (sshSessions.size() > 0) {    //tzn. jesteśmy połączeni

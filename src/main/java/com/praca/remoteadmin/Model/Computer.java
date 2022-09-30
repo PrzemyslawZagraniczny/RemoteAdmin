@@ -1,6 +1,7 @@
 package com.praca.remoteadmin.Model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.praca.remoteadmin.Connection.ConnectionHelper;
 import com.praca.remoteadmin.Connection.ConsoleCaptureOutput;
 import com.praca.remoteadmin.Connection.SSH2Connector;
@@ -9,16 +10,26 @@ import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
     private SimpleStringProperty  address = new SimpleStringProperty();
+    @JsonInclude
+    private SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
+
+    public boolean isSelected() {
+        return selected.get();
+    }
+
+    public SimpleBooleanProperty selectedProperty() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected.set(selected);
+    }
 
     @JsonIgnore
     AtomicBoolean bgCommand = new AtomicBoolean(false);
@@ -83,7 +94,7 @@ public class Computer {
     private StatusType stat = StatusType.UNKNOWN;
 
     //czy maszyna zostala wybrana do poczenia (ustawiane checkboxem)
-    private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);
+
 
     public boolean isPrintout() {
         return printout.get();
@@ -97,6 +108,7 @@ public class Computer {
         this.printout.set(printout);
     }
 
+    @JsonInclude
     private SimpleBooleanProperty printout = new SimpleBooleanProperty(false);
     @JsonIgnore
     private SimpleStringProperty cmdExitStatus = new SimpleStringProperty("");
@@ -139,12 +151,8 @@ public class Computer {
     }
 
     public Computer() {
-        addSelectedListener();
         clearBuffer();
-
-        
-
-
+        addSelectedListener();
     }
     public void setOutputStream(ConsoleCaptureOutput out) {
         this.out = out;
@@ -161,14 +169,17 @@ public class Computer {
     }
 
     private void addSelectedListener() {
-        selected.addListener(observable -> {
+        printout.addListener(change -> {
+            if (observer != null) {
+                observer.saveData();
+            }
+        });
+
+        selected.addListener(change -> {
             if(observer != null) {
                 observer.saveData();
             }
-
             ConnectionHelper.log.info("User "+(selected.get() ?"selected":"unselected")+" host <<"+getAddress()+">>");
-        });
-        selected.addListener(change -> {
             if(parent != null ) {
                 if (selected.get())
                     parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get() + 1);
@@ -176,6 +187,7 @@ public class Computer {
                     parent.numberOfComputersProperty().set(parent.numberOfComputersProperty().get() - 1);
                 parent.computerStatusProperty().set(parent.numberOfComputersProperty().get() + "/" + parent.getComputers().size());
             }
+
         });
         update.addListener(change -> {
             if(printout.get())
@@ -245,19 +257,9 @@ public class Computer {
         this.address.set(address);
     }
 
-    public boolean isSelected() {
-        return selected.get();
-    }
 
-    public SimpleBooleanProperty selectedProperty() {
-        return selected;
-    }
 
-    public void setSelected(boolean selected) {
-        this.selected.set(selected);
 
-        ConnectionHelper.log.info("User "+(selected ?"selected":"unselected")+" host <<"+getAddress()+">>");
-    }
 
     public StatusType getStat() {
         return stat;
