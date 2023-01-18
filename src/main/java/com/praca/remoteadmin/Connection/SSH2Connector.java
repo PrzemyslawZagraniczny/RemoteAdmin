@@ -221,7 +221,14 @@ public class SSH2Connector implements IGenericConnector{
 
                 ((ChannelExec) channel).setOutputStream(computer.getPs());
                 //((ChannelExec) channel).setOutputStream(null);
-                channel.connect(timeOut);
+
+
+                try {
+                    channel.connect(timeOut);
+                }
+                catch(JSchException e) {
+                    System.err.println(e.getMessage());
+                }
 
             } else {
                 timeOut = ConnectionHelper.sudoConnectionTimeOut;

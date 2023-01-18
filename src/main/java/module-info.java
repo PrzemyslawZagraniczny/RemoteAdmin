@@ -14,6 +14,7 @@ module com.praca.remoteadmin {
     requires org.junit.jupiter.api;
     requires log4j;
     requires com.fasterxml.jackson.databind;
+    requires annotations;
 
     opens com.praca.remoteadmin to javafx.fxml;
     exports com.praca.remoteadmin;

@@ -16,6 +16,11 @@ Komenda uruchomienia JARa:
 <i>java --module-path <b>/snap/openjfx/current/sdk/lib/</b> --add-modules javafx.controls,javafx.base,javafx.fxml -jar RemoteAdmin-1.5-jar-with-dependencies.jar</i>
 </p>
 
+### wersja 1.5.6
+<li>Obsługa wyłącznie aktywnej pracowni.</li>
+<li>Usunięte błędy przy 'batch connect' z wieloma komputerami, z których część nie jest responsywna.</li>
+<li>Zamykanie wszystkich aktywnych wątków na koniec programu.</li>
+
 ### wersja 1.5.5
 <li>Podczas pierwszego uruchamiania programu program nie wysypuje się przy braku pliku <i>settings.json</i></li>
 

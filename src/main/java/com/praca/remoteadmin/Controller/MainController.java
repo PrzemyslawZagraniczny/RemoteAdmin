@@ -24,6 +24,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
@@ -41,6 +42,7 @@ public class MainController implements ISaveDataObserver, Runnable {
     AtomicBoolean openSession = new AtomicBoolean(false);
     //aktualizacja statusu maszyny z OFFLINE/TIMEOUT do CONNECTED
     BlockingQueue<CommandCallable> sshReconnect = new LinkedBlockingQueue<>();
+    boolean pressedConnect = false;
     @FXML
     public MenuItem btQuit;
 
@@ -124,6 +126,7 @@ public class MainController implements ISaveDataObserver, Runnable {
     private Thread connectionDispatchThread = null;     //looper do sprawdzania statusu
     private Thread pingThread = null;               //wątek do wznawiania połączenia
     private Stage stage = null;
+    private boolean closingAppFlag = false;
 
 
     public void onQuit(ActionEvent actionEvent) {
@@ -302,7 +305,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         cmdLine.getSelectionModel().select(-1);
 
 
-        execParallel(CmdType.SENDING_CMD, sshSessions);
+        execParallel(CmdType.SENDING_CMD, sshSessions, ModeType.USER_TRIGGERED);
     }
 
 
@@ -313,28 +316,31 @@ public class MainController implements ISaveDataObserver, Runnable {
             return false;
     }
 
-    private void execParallel(CmdType cmdType, Set<CommandCallable> sshs) {
-        new Thread(() -> exec(cmdType, sshs)).start();
+    private void execParallel(CmdType cmdType, Set<CommandCallable> sshs, ModeType mode) {
+        new Thread(() -> exec(cmdType, sshs, mode)).start();
     }
 
 
-    private void exec(CmdType cmdType,Set<CommandCallable> ssh) {
+    private void exec(CmdType cmdType, Set<CommandCallable> ssh, ModeType mode) {
         Set<CommandCallable> sshMachines = ssh;
         int cntSelected = 0;
         //synchronized (sshMachines)
         {        //synchronizuj na maszynach (gdyby ktoś próbował kliknąć checkboxa obok maszyny)
             for (CommandCallable comp : sshMachines) {
-                if (comp.comp.isSelected() &&
-                        ( comp.comp.getStat() == StatusType.CONNECTED ||     //tylko jeśli maszyna zaznaczona i połączona
-                        cmdType != CmdType.SENDING_CMD )) {    //tylko jeśli maszyna zaznaczona i połączona albo w trybie łączenia/rozłączania
-
-                    comp.setCmdType(cmdType);
-                    cntSelected++;
+                //tylko jeśli maszyna zaznaczona
+                if (comp.comp.isSelected()) {
+                    // i połączona i w trybie rozłączania/polecenia
+                    if (((comp.comp.getStat() == StatusType.CONNECTED)) ||
+                            ((cmdType == CmdType.CONNECTING)) //w trybie łączenia
+                    ) {
+                        comp.setCmdType(cmdType);
+                        cntSelected++;
+                    }
                 }
             }
 
             if(cntSelected <= 0) {
-                postDisconnect();
+                postDisconnect(mode);
                 return;
             }
             CountDownLatch latch = new CountDownLatch(cntSelected);
@@ -347,6 +353,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                     comp.setLatch(latch);
                 }
             }
+            //wykonanie grupowej komendy na wszystkich maszynach
             try {
                 futures = executorService.invokeAll(sshMachines);
             } catch (InterruptedException e) {
@@ -355,6 +362,7 @@ public class MainController implements ISaveDataObserver, Runnable {
             }
 
             try {
+                //oczekuj wykonania na wszystkich maszynach
                 latch.await();
 
             } catch (InterruptedException e) {
@@ -363,10 +371,11 @@ public class MainController implements ISaveDataObserver, Runnable {
             }
             switch (cmdType) {
                 case DISCONNECTING:         //posprzątaj ale dopiero po zamknięciu wszystkich połączeń
+                    int cntDisconnect = 0;
                     for (CommandCallable comp : sshMachines) {
                         comp.comp.setProgressStatus(0);
                     }
-                    postDisconnect();
+                    postDisconnect(mode);
                     synchronized (sshSessions) {
                         sshSessions.clear();
                     }
@@ -375,7 +384,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                 case CONNECTING: {
                     cntSelected = 0;
                     int cntConnected = 0;
-                    synchronized (ssh)
+                    synchronized (sshSessions)
                     {        //synchronizuj na maszynach (gdyby ktoś próbował kliknąć checkboxa obok maszyny)
                         for (CommandCallable comp : ssh) {
                             if (comp.comp.isSelected()) {
@@ -387,8 +396,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                     }
                     ConnectionHelper.log.info("Established connection to " + cntConnected+"/"+cntSelected + " hosts.");
                     if(cntConnected <= 0) {
-                        cntConnected = 0;
-                        postDisconnect();
+                        postDisconnect(mode);
                     }
                     else {
                         //wątek Pinga aktywnych maszyn
@@ -441,29 +449,33 @@ public class MainController implements ISaveDataObserver, Runnable {
         HistoryLog.loadData(cmdLine, hash);
 
         if(sale == null) {
-            ConnectionHelper.log.error("LabRooms are undefined!!!");
+            ConnectionHelper.log.error("Lab Rooms are undefined!!!");
             return;
         }        //najpierw sprawdź czy dane logowania są obecne
 
+        sale.get((0)).getComputers();
         btConnect.setDisable(true);
         if(sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
 
             //najpierw pozamykać wszystkie połączenia
-            execParallel(CmdType.DISCONNECTING, sshSessions);
+            execParallel(CmdType.DISCONNECTING, sshSessions, ModeType.USER_TRIGGERED);
+            pressedConnect = false;
             return;
         }
+        pressedConnect = true;
 
 
 
 
-        //LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
-        for(LabRoom room : sale) {
+//        for(LabRoom room : sale)
+        {
+            LabRoom room = sale.get(cbSala.getSelectionModel().getSelectedIndex());
             for (Computer comp : room.getComputers()) {
                 sshSessions.add(new CommandCallable(comp, login, pass));
             }
         }
         ConnectionHelper.log.info("Trying to establish connection with hosts...");
-        execParallel(CmdType.CONNECTING, sshSessions);
+        execParallel(CmdType.CONNECTING, sshSessions, ModeType.USER_TRIGGERED);
         selectCol.setEditable(false);
         selectRoomCol.setEditable(false);
         chkSelectAll.setDisable(true);
@@ -473,7 +485,7 @@ public class MainController implements ISaveDataObserver, Runnable {
 
         //wątek dla reconnecting komputerów, które zmieniły status z offline na online albo timeout/online
         connectionDispatchThread = new Thread(() -> {
-            while(openSession.get()) {
+            while(openSession.get() && pressedConnect == true && closingAppFlag == false) {
                 try {
                     CommandCallable cc = sshReconnect.poll();
                     if(cc == null) {
@@ -490,7 +502,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                     //new Thread(() -> cc.connect()).start();
 
 
-                    execParallel(CmdType.CONNECTING, hs);
+                    execParallel(CmdType.CONNECTING, hs, ModeType.BG);
 
                 } catch (InterruptedException ex) {
                     ConnectionHelper.log.error(ex.getMessage());
@@ -498,6 +510,7 @@ public class MainController implements ISaveDataObserver, Runnable {
 
                 }
             }
+            sshReconnect.clear();
         });
         connectionDispatchThread.setPriority(MIN_PRIORITY);
         connectionDispatchThread.start();
@@ -530,10 +543,11 @@ public class MainController implements ISaveDataObserver, Runnable {
         return false;
     }
 
-    private void postDisconnect() {
+    private void postDisconnect(ModeType mode) {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                if(mode == ModeType.BG) return;
                 openSession.set(false);             //zamyka wątek cyklicznego powtórnego łączenia
                 btConnect.setDisable(false);
                 btConnect.setText("Połącz");
@@ -701,7 +715,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         while(openSession.get()) {
             try {
                 Thread.sleep(ConnectionHelper.pingDelay);
-                if(sshSessions != null)
+                if(sshSessions != null && pressedConnect == true && closingAppFlag == false)
                     synchronized (sshSessions)
                     {
                         for (CommandCallable cc : sshSessions) {
@@ -713,7 +727,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                                     if (!bOnline) {
                                         cc.comp.abortCommand();
 //                                        cc.disconnect();
-                                        cc.comp.setCmdExitStatus("Computer off-line.");
+                                        cc.comp.setCmdExitStatus("Computer offline.");
                                         cc.comp.setProgressStatus(0);
                                         cc.comp.setStat(OFFLINE);                   //computer is down
                                     }
@@ -784,13 +798,14 @@ public class MainController implements ISaveDataObserver, Runnable {
         }
     }
 
-    public void setStage(Stage stage) {
+    public void setStage(@NotNull Stage stage) {
         this.stage = stage;
         stage.setOnCloseRequest(windowEvent -> {
             synchronized(sshSessions) {
                 if (sshSessions.size() > 0) {    //tzn. jesteśmy połączeni
                     //najpierw pozamykać wszystkie połączenia
-                    execParallel(CmdType.DISCONNECTING, sshSessions);
+                    execParallel(CmdType.DISCONNECTING, sshSessions, ModeType.USER_TRIGGERED);
+                    closingAppFlag = true;
                 }
                 openSession.set(false);
             }
@@ -840,6 +855,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                 e.printStackTrace();
             }
             latch.countDown();
+
             return ret;
         }
 
@@ -853,12 +869,15 @@ public class MainController implements ISaveDataObserver, Runnable {
                     break;
                 case SENDING_CMD:
                     //ConnectionHelper.log.info("Querrying <<"+comp.getAddress()+">>...");
-                    sndCommand();
+                    if(comp.getStat() == CONNECTED) //tylko jeśli jesteśmy połączeni (połączenie może się zerwać)
+                        sndCommand();
 
                     break;
                 case DISCONNECTING:
-                    ConnectionHelper.log.info("Disconnecting with <<"+comp.getAddress()+">>...");
-                    disconnect();
+                    if((comp.getStat() == CONNECTED || comp.getStat() == CONNECTING)) {
+                        ConnectionHelper.log.info("Disconnecting with <<"+comp.getAddress()+">>...");
+                        disconnect();
+                    }
                     break;
                 case NONE:
                 default:
@@ -890,9 +909,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         public void disconnect() {
             if(comp == null || !comp.isSelected() || conn == null)
                 return;
-            if((comp.getStat() == CONNECTED || comp.getStat() == CONNECTING)) {
-                conn.disconnect();
-            }
+            conn.disconnect();
             comp.clearBuffer();
             latch.countDown();
         }
