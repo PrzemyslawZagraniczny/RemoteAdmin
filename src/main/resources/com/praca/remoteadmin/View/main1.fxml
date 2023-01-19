@@ -148,6 +148,7 @@
                                     <Tooltip text="Komenda  spycha zadanie do pracy w tle." />
                                  </tooltip>
                               </Button>
+                              <Button alignment="CENTER" contentDisplay="CENTER" layoutX="428.0" layoutY="1.0" mnemonicParsing="false" onAction="#onConsoleCopy" prefHeight="25.0" prefWidth="206.0" text="Kopiuj do schowka" AnchorPane.bottomAnchor="340.0" AnchorPane.rightAnchor="344.0" />
                            </children>
                         </AnchorPane>
                      </children>

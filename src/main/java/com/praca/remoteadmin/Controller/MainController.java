@@ -20,6 +20,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -200,7 +202,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         //powiązanie kolumn tabelki z properties dla obiektu Computer
 
         roomNameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-        selectRoomCol.setCellValueFactory(new PropertyValueFactory<>("selected"));
+        selectRoomCol.setCellValueFactory(new PropertyValueFactory<>("select"));
         noCompInRoomCol.setCellValueFactory(new PropertyValueFactory<>("computerStatus"));
         selectRoomCol.setCellFactory( p -> new CheckBoxTableCell<>());
 
@@ -286,9 +288,8 @@ public class MainController implements ISaveDataObserver, Runnable {
 
         if(checkIfSudoCommand(command)) {
 
-            //SSH2Connector.sudo_pass = "793691235!";
-            if(SSH2Connector.setSudoPassword() == null)
-                return;
+//            SSH2Connector.sudo_pass = "7936912351";
+            if(SSH2Connector.setSudoPassword() == null)                return;
         }
         btnExecCmd.setDisable(true);
         //blokuj zaznaczanie maszyn w trakcie otwartej sesji SSH
@@ -810,6 +811,14 @@ public class MainController implements ISaveDataObserver, Runnable {
                 openSession.set(false);
             }
         });
+    }
+
+    public void onConsoleCopy(ActionEvent actionEvent) {
+
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(consoleOutput.getText());
+        clipboard.setContent(content);
     }
 
     //TODO: klasę Callable do utworzenia połączenia

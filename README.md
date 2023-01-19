@@ -17,6 +17,8 @@ Komenda uruchomienia JARa:
 </p>
 
 ### wersja 1.5.6
+<li>Usunięcie blokowania przycisku polecenia ('>>') przy błędzie logowania.</li>
+<li>Przycisk 'kopiuj do schowka'.</li>
 <li>Obsługa wyłącznie aktywnej pracowni.</li>
 <li>Zapamiętywanie zaznaczonych komputerów (bugfix).</li>
 <li>Usunięte błędy przy 'batch connect' z wieloma komputerami, z których część nie jest responsywna.</li>

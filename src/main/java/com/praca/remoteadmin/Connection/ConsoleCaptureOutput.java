@@ -16,6 +16,13 @@ public class ConsoleCaptureOutput extends OutputStream {
     //StringBuffer buffer = new StringBuffer();
     ByteArrayOutputStream bs = new ByteArrayOutputStream(1000);
 
+    public boolean checkForPass(String s1) {
+        int indx = bs.toString().lastIndexOf(s1);
+        if( indx == bs.toString().length() - s1.length()) { //upewnij się, że s1 jest na końcu stringu
+            return true;
+        }
+        return false;
+    }
     public ConsoleCaptureOutput(TextArea ta) {
         this.txt = ta;
         Platform.runLater(() ->{
@@ -54,5 +61,9 @@ public class ConsoleCaptureOutput extends OutputStream {
         if(txt != null)
             txt.clear();
         bs = new ByteArrayOutputStream(1024*10);
+    }
+
+    public String getString() {
+        return bs.toString();
     }
 }

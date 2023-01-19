@@ -17,6 +17,7 @@ public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
     private SimpleStringProperty  address = new SimpleStringProperty();
     private SimpleBooleanProperty selected = new SimpleBooleanProperty();
+    private String oldValue = "";
 
     public boolean isSelected() {
         return selected.get();
@@ -126,6 +127,7 @@ public class Computer {
 
     @JsonIgnore
     private SimpleDoubleProperty progressStatus = new SimpleDoubleProperty(0);
+
 
     public String getCmdExitStatus() {
         return cmdExitStatus.get();
@@ -341,5 +343,22 @@ public class Computer {
     public void resetFlags() {
         bgCommand.set(false);
         abortCommand.set(false);
+    }
+    public boolean wrongPass() {
+        String s1 = "Niestety, proszę spróbować ponownie.\n";
+        String s2 = "Sorry, try again.\n";
+
+        if(out.checkForPass(s1))
+            return true;
+        if(out.checkForPass(s2))
+            return true;
+        return false;
+    }
+
+    public void conditionalRefresh() {
+        if(oldValue.compareTo(out.getString()) != 0) {
+            refresh();
+            oldValue = out.getString();
+        }
     }
 }

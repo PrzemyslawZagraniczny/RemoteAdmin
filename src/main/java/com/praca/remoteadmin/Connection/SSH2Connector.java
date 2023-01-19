@@ -230,8 +230,6 @@ public class SSH2Connector implements IGenericConnector{
                     System.err.println(e.getMessage());
                 }
 
-            } else {
-                timeOut = ConnectionHelper.sudoConnectionTimeOut;
             }
 
             channel.setInputStream(null);
@@ -240,7 +238,6 @@ public class SSH2Connector implements IGenericConnector{
             byte[] tmp=new byte[1024];
             while(bUnInterrupted){
                 try {
-
                     while(in.available()>0){
                         //wchodzimy tutaj gdy skrypt pracuje interaktywnie
                         int i=in.read(tmp, 0, 1024);
@@ -259,6 +256,13 @@ public class SSH2Connector implements IGenericConnector{
                         ConnectionHelper.log.info("Querrying <<"+computer.getAddress()+">> exit-status:" + channel.getExitStatus());
                         latch.countDown();
                         break;
+                    }
+                    if(computer.wrongPass()) {
+                        latch.countDown();
+                        channel.disconnect();
+                        computer.setCmdExitStatus(-1); //Wrong pass
+                        computer.setProgressStatus(0);
+                        computer.resetFlags();
                     }
                     if(computer.isAborted()) {
                         latch.countDown();
@@ -283,6 +287,7 @@ public class SSH2Connector implements IGenericConnector{
                         return;
                     }
 
+                    computer.conditionalRefresh();
                     Thread.sleep(sleepTm);
                     //computer.setProgressStatus(computer.getProgressStatus() + sleepTm/(double)timeOut * (-1.0 * dir));
                     computer.setProgressStatus(-1);

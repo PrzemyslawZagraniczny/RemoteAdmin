@@ -55,6 +55,11 @@ public class LabRoom  {
     ObservableList<Computer> compsObsrv = null;
     private int id;
     private String name;
+
+    public boolean isSelect() {
+        return select.get();
+    }
+
     private SimpleBooleanProperty select = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
     public void setObserver(ISaveDataObserver observer) {
         this.observer = observer;
