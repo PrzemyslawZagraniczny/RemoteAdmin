@@ -22,27 +22,12 @@ public class LabRoom  {
         else
             compsObsrv = FXCollections.observableArrayList();
         //numberOfComputers.bind(Bindings.size(compsObsrv));
-        int retVal = 0;
-        for(Computer c : compsObsrv) {
-            retVal = c.isSelected()?retVal+1:retVal;
-        }
-        numberOfComputers.set(retVal);
-
-//        numberOfComputers.bind(new IntegerBinding() {
-//            @Override
-//            protected int computeValue() {
-//                int retVal = 0;
-//                for(Computer c : compsObsrv) {
-//                    retVal = c.isSelected()?retVal+1:retVal;
-//                }
-//                return retVal;
-//            }
-//        });
 
         int cnt = 0;
         for(Computer c : compsObsrv) {
             cnt += c.isSelected()?1:0;
         }
+        numberOfComputers.set(cnt);
         computerStatus.set(cnt+"/"+compsObsrv.size());
         compsObsrv.addListener(new ListChangeListener<Computer>() {
             @Override
@@ -70,7 +55,7 @@ public class LabRoom  {
     ObservableList<Computer> compsObsrv = null;
     private int id;
     private String name;
-    private SimpleBooleanProperty selected = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
+    private SimpleBooleanProperty select = new SimpleBooleanProperty(true);//new SimpleBooleanProperty
     public void setObserver(ISaveDataObserver observer) {
         this.observer = observer;
     }
@@ -92,12 +77,12 @@ public class LabRoom  {
         this.numberOfComputers.set(numberOfComputers);
     }
 
-    public boolean isSelected() {
-        return selected.get();
+    public boolean getSelect() {
+        return select.get();
     }
 
-    public SimpleBooleanProperty selectedProperty() {
-        return selected;
+    public SimpleBooleanProperty selectProperty() {
+        return select;
     }
 
     public String getComputerStatus() {
@@ -112,8 +97,8 @@ public class LabRoom  {
         this.computerStatus.set(computerStatus);
     }
 
-    public void setSelected(boolean selected) {
-        this.selected.set(selected);
+    public void setSelect(boolean select) {
+        this.select.set(select);
         if(observer != null) {
             observer.saveData();
         }
@@ -121,13 +106,13 @@ public class LabRoom  {
 
     public LabRoom() {
         computers = new LinkedList<>();
-        selected.set(true);
+        select.set(true);
         compsObsrv = FXCollections.observableArrayList(computers);
 
         //numberOfComputers.multiply(computers.size());
-        selected.addListener(change -> {
+        select.addListener(change -> {
             for(Computer c : computers) {
-                c.setSelected(selected.get());
+                c.setSelected(select.get());
             }
         });
 
@@ -139,10 +124,10 @@ public class LabRoom  {
         compsObsrv = FXCollections.observableArrayList();
         computers = new LinkedList<>();
 
-        selected.set(true);
-        selected.addListener(change -> {
+        select.set(true);
+        select.addListener(change -> {
             for(Computer c : computers) {
-                c.setSelected(selected.get());
+                c.setSelected(select.get());
             }
         });
 

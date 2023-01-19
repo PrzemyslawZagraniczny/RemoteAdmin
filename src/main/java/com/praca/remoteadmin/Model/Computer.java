@@ -16,8 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Computer {
     private SimpleStringProperty name = new SimpleStringProperty();
     private SimpleStringProperty  address = new SimpleStringProperty();
-    @JsonInclude
-    private SimpleBooleanProperty selected = new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty selected = new SimpleBooleanProperty();
 
     public boolean isSelected() {
         return selected.get();

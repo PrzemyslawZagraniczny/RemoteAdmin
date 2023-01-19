@@ -630,7 +630,7 @@ public class MainController implements ISaveDataObserver, Runnable {
 
         if(sale != null) {
             for(LabRoom room : sale) {
-                if(room.isSelected())
+                if(room.getSelect())
                     list.add(room);
             }
         }
