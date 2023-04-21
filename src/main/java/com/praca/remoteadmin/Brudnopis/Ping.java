@@ -39,13 +39,13 @@ class Ping
     public static void main(String[] args)
             throws IOException, InterruptedException, ExecutionException {
 
-        String []ipAddressess = new String [] {"192.168.42.16", "192.168.42.116", "192.168.42.86"};
-
-        pingCheck(ipAddressess);
-        String ipAddress = "192.168.42.116";
-        sendPingRequest(ipAddress);
-
-        ipAddress = "spk-ssh.if.uj.edu.pl";
+//        String []ipAddressess = new String [] {"192.168.42.16", "192.168.42.116", "192.168.42.86"};
+//
+//        pingCheck(ipAddressess);
+//        String ipAddress = "192.168.42.116";
+//        sendPingRequest(ipAddress);
+//
+//        ipAddress = "spk-ssh.if.uj.edu.pl";
         //sendPingRequest(ipAddress);
     }
 

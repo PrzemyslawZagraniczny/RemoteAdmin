@@ -161,7 +161,7 @@ public class AddComputersDialog {
                             Thread.sleep(5);
                         } catch (InterruptedException e) {
                             ConnectionHelper.log.error(e.getMessage());
-                            e.printStackTrace();
+//                            e.printStackTrace();
                         }
 
                         if(text.lastIndexOf('.') == text.indexOf('.') && text.indexOf('.') >= 0) {
@@ -194,7 +194,7 @@ public class AddComputersDialog {
                             Thread.sleep(5);
                         } catch (InterruptedException e) {
                             ConnectionHelper.log.error(e.getMessage());
-                            e.printStackTrace();
+//                            e.printStackTrace();
                         }
                         ipTextField2.appendText(".");
                     });

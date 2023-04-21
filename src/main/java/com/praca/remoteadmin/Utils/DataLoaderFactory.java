@@ -49,13 +49,13 @@ public class DataLoaderFactory {
                     } catch (JsonMappingException var10) {
                         ConnectionHelper.log.error(var10);
                         new MessageBoxTask( "Plik <<data.json>> posiada uszkodzone dane.","Uwaga", Alert.AlertType.ERROR).run();
-                        var10.printStackTrace();
+//                        var10.printStackTrace();
                     } catch (JsonParseException var11) {
                         ConnectionHelper.log.error(var11);
-                        var11.printStackTrace();
+//                        var11.printStackTrace();
                     } catch (IOException var12) {
                         ConnectionHelper.log.error(var12);
-                        var12.printStackTrace();
+//                        var12.printStackTrace();
 
                     }
                 case TXT:
@@ -98,7 +98,7 @@ public class DataLoaderFactory {
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
     }

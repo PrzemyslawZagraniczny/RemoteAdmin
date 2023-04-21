@@ -72,7 +72,7 @@ public class Settings implements Serializable {
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -86,7 +86,7 @@ public class Settings implements Serializable {
 
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
     }
