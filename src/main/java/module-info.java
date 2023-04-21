@@ -15,6 +15,7 @@ module com.praca.remoteadmin {
     requires log4j;
     requires com.fasterxml.jackson.databind;
     requires annotations;
+    requires jacpfx.JavaFX;
 
     opens com.praca.remoteadmin to javafx.fxml;
     exports com.praca.remoteadmin;

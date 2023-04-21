@@ -10,18 +10,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.UnaryOperator;
 
+
 public class AddComputersDialog {
+
+    private final Stage stage;
 
     public ObservableList<Computer> getComps() {
         return comps;
@@ -30,6 +36,7 @@ public class AddComputersDialog {
     //lista komputerów do zwrotu
     private ObservableList<Computer> comps = FXCollections.observableArrayList();
     Node btnOk = null;
+
     TableView<Computer> table = new TableView<>();
     TableColumn<Computer, Boolean> selectCol = new TableColumn<>("Dodaj");
     TableColumn<Computer, String> addressCol = new TableColumn<>("Adres IP");
@@ -38,6 +45,7 @@ public class AddComputersDialog {
     TableCell<Computer, String>  addressCell = new TableCell<>();
 
     private Label addressLabel = new javafx.scene.control.Label("");
+    private Label summarizeLabel = new javafx.scene.control.Label("");
 
     protected String increaseIPAddress(String sIPAddress) {
         long ipAddres = convertFromString(sIPAddress);
@@ -82,8 +90,9 @@ public class AddComputersDialog {
         return ip;
     }
 
-    public AddComputersDialog(ObservableList<LabRoom> sale, LabRoom room, ISaveDataObserver observer) {
+    public AddComputersDialog(ObservableList<LabRoom> sale, LabRoom room, ISaveDataObserver observer, Stage stage) {
 
+        this.stage = stage;
         int row = 0;
         TextField nameTextField = new TextField("");
         TextField ipTextField = new TextField("");
@@ -248,7 +257,7 @@ public class AddComputersDialog {
 
         grid.add(new Label("Tabela komputerów do dodania:"), 0, ++row);
         grid.add(table, 0,++row);
-        Button btnClear = new Button("Wyczyść tabelkę.");
+        Button btnClear = new Button("Wyczyść tabelkę");
 
         btnClear.setOnAction(actionEvent -> Platform.runLater(() -> {
             table.getItems().clear();        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK );
@@ -260,28 +269,55 @@ public class AddComputersDialog {
         Button btnFilterIPs = new Button("Filtruj dodatkowo komputery PINGiem");
         btnFilterIPs.setOnAction(actionEvent -> {
             btnFilterIPs.setDisable(true);
-            for (Computer c : comps) {
-                if (c.isSelected()) {
-                    new Thread(() ->
-                    {
-                        try {
-                            final boolean bRet = Ping.ping(c.getAddress());
-                            Platform.runLater(() -> c.setSelected(bRet));
-                        } catch (IOException e) {
-                            ConnectionHelper.log.error(e.getMessage());
-                            //e.printStackTrace();
-                            c.setSelected(false);
+            //sprawdzamy pingiem dostępnąść maszyn
+
+                Platform.runLater(() -> {
+                    dialog.getDialogPane().setCursor(Cursor.WAIT);
+                });
+                new Thread(() -> {
+                    try {
+                        pingCheck(comps);
+                    } catch (InterruptedException e) {
+                        ConnectionHelper.log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    } catch (ExecutionException e) {
+                        ConnectionHelper.log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                     finally {
+                            Platform.runLater(() -> {
+                                btnFilterIPs.setDisable(false);
+                                dialog.getDialogPane().setCursor(Cursor.DEFAULT);
+                            });
+
                         }
-
-
-                    }).start();
-
-                    btnFilterIPs.setDisable(false);
-                }
-            }
+                }).start();
+//            for (Computer c : comps) {
+//                if (c.isSelected()) {
+//                    new Thread(() ->
+//                    {
+//                        try {
+//                            final boolean bRet = Ping.ping(c.getAddress());
+//                            Platform.runLater(() -> c.setSelected(bRet));
+//                        } catch (IOException e) {
+//                            ConnectionHelper.log.error(e.getMessage());
+//                            //e.printStackTrace();
+//                            c.setSelected(false);
+//                        }
+//
+//
+//                    }).start();
+//
+//                    btnFilterIPs.setDisable(false);
+//                }
+//            }
         });
+
+
         grid.add(btnFilterIPs, 0, ++row);
         btnFilterIPs.setTooltip(new Tooltip("Sprawdza komendą PING dostępność komputera i w jej braku wyłacza go z listy dodawanych."));
+        grid.add(summarizeLabel, 0, ++row);
+
         btnOk = dialog.getDialogPane().lookupButton(ButtonType.OK);
 
         btnOk.setDisable(true);
@@ -312,6 +348,44 @@ public class AddComputersDialog {
         observer.saveData();
     }
 
+    //sprawdza pingiem dostępność wpisanych adresów
+    private void pingCheck(ObservableList<Computer> comps) throws InterruptedException, ExecutionException {
+
+        ExecutorService executorService = Executors.newFixedThreadPool(comps.size());
+        Set<Callable<Boolean>> callables = new HashSet<>();
+        Platform.runLater(() -> summarizeLabel.setText(""));
+
+        comps.forEach( (c) -> {
+            callables.add( () -> {
+                boolean bRet = false;
+                try {
+                    bRet = Ping.ping(c.getAddress());
+                    boolean finalBRet = bRet;
+                    Platform.runLater(() -> c.setSelected(finalBRet));
+                } catch (IOException e) {
+                    ConnectionHelper.log.error(e.getMessage());
+                    //e.printStackTrace();
+                    Platform.runLater(() -> c.setSelected(false));
+                }
+                return bRet;
+            });
+        });
+
+        List<Future<Boolean>> futures = executorService.invokeAll(callables);
+
+        int iSuccess = 0;
+        int iFailed = 0;
+        for(Future<Boolean> future : futures){
+            int tmp = future.get() == true ? iSuccess++ : iFailed++;
+            System.out.println(future.get());
+        }
+        executorService.shutdown();
+
+        int finalISuccess = iSuccess;
+        Platform.runLater(() -> {
+            summarizeLabel.setText(finalISuccess +"/"+(comps.size()) + " maszyn jest dostępnych w tej chwili");
+        });
+    }
     private String IPv32RegEx() {
         return "(\\d{0,3})(\\.(\\d{0,3})){0,3}";
     }

@@ -16,6 +16,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.ProgressBarTableCell;
@@ -655,7 +656,7 @@ public class MainController implements ISaveDataObserver, Runnable {
             new MessageBoxTask("Najpierw trzeba utworzyć choć jedną pracownię, do której można dodać komputery.", "Uwaga", Alert.AlertType.INFORMATION).run();
             return;
         }
-        AddComputersDialog dlg = new AddComputersDialog(sale, sale.get(cbSala.getSelectionModel().getSelectedIndex()), this);
+        AddComputersDialog dlg = new AddComputersDialog(sale, sale.get(cbSala.getSelectionModel().getSelectedIndex()), this, stage);
         salaSelect(null);       //dla odświeżenia widoku tabelki
 
     }
@@ -664,7 +665,7 @@ public class MainController implements ISaveDataObserver, Runnable {
         saveSettings();
     }
 
-    //implementacja funkcji observera do aktualizacji pliku data.json
+    //implementacja funkcji observera dla aktualizacji pliku data.json używana przez dialog dodawania komputerów
     @Override
     public boolean saveData() {
         ConnectionHelper.saveData(sale);
@@ -743,7 +744,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                                         }
 
                                     } else {
-                                        cc.comp.setStat(OFFLINE);                   //computer is down
+                                        cc.comp.setStat(UNKNOWN);                   //computer is down
                                     }
                                 }
                             }
