@@ -55,7 +55,7 @@ public class HistoryLog {
             return hashtext;
         } catch (NoSuchAlgorithmException e) {
             ConnectionHelper.log.error(e.getMessage());
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return null;
     }
@@ -67,8 +67,7 @@ public class HistoryLog {
             if(f.exists())
                 list = Files.readAllLines(f.toPath());
             else {
-                f.createNewFile();
-                return true;
+                return f.createNewFile();
             }
         } catch (IOException ex) {
             ConnectionHelper.log.error(ex.getMessage());

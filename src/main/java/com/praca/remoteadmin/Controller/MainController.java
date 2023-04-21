@@ -508,8 +508,8 @@ public class MainController implements ISaveDataObserver, Runnable {
 
                 } catch (InterruptedException ex) {
                     ConnectionHelper.log.error(ex.getMessage());
-                    ex.printStackTrace();
-
+//                    ex.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             }
             sshReconnect.clear();
@@ -756,7 +756,8 @@ public class MainController implements ISaveDataObserver, Runnable {
                 }
             } catch (InterruptedException | IOException e) {
                 ConnectionHelper.log.error(e.getMessage());
-                throw new RuntimeException(e);
+//                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -862,7 +863,7 @@ public class MainController implements ISaveDataObserver, Runnable {
                 ret = conn.openConnection(login, pass,  this.comp);
             } catch (JSchException e) {
                 ConnectionHelper.log.error(e.getMessage());
-                e.printStackTrace();
+//                e.printStackTrace();
             }
             latch.countDown();
 

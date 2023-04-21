@@ -55,11 +55,11 @@ public class SSH2Connector implements IGenericConnector{
         try {
             session = jsch.getSession(sLogin, comp.getAddress(), iPort);
         }catch (NullPointerException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
             return false;
         } catch (JSchException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
             return false;
         }
@@ -126,7 +126,7 @@ public class SSH2Connector implements IGenericConnector{
                 return true;
             }
          }catch (NullPointerException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
             return false;
         }
@@ -301,7 +301,7 @@ public class SSH2Connector implements IGenericConnector{
                         computer.setCmdExitStatus(channel.getExitStatus());
                 } catch (IOException e) {
                     ConnectionHelper.log.error(e.getMessage());
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     computer.setProgressStatus(0);
                     computer.setCmdExitStatus(110);
                     latch.countDown();
@@ -310,13 +310,14 @@ public class SSH2Connector implements IGenericConnector{
                         computer.setCmdExitStatus(channel.getExitStatus());
                 } catch (InterruptedException e) {
                     ConnectionHelper.log.error(e.getMessage());
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     latch.countDown();
                     bUnInterrupted = false;
                     computer.setProgressStatus(0);
                     computer.setCmdExitStatus(-1);
                     if (channel != null)
                         computer.setCmdExitStatus(channel.getExitStatus());
+                    Thread.currentThread().interrupt();
                 }
             }
         } catch (JSchException e) {
@@ -324,14 +325,14 @@ public class SSH2Connector implements IGenericConnector{
             computer.setProgressStatus(0);
             computer.setCmdExitStatus(e.getMessage());
             setStatusToErrorMessage(e);
-            e.printStackTrace();
+            //e.printStackTrace();
             latch.countDown();
             return;
         } catch (IOException e) {
             ConnectionHelper.log.error(e.getMessage());
             computer.setProgressStatus(0);
             computer.setCmdExitStatus(-1);
-            e.printStackTrace();
+            //e.printStackTrace();
             latch.countDown();
             return;
         }
@@ -387,7 +388,7 @@ public class SSH2Connector implements IGenericConnector{
             channel.connect(ConnectionHelper.sshConnectionTimeOut);
         } catch (JSchException e) {
             ConnectionHelper.log.error(e.getMessage());
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         passArgs(sudo_pass);
 
@@ -407,7 +408,7 @@ public class SSH2Connector implements IGenericConnector{
             computer.setProgressStatus(0);
             ConnectionHelper.log.info("Successfully disconnected from <<"+computer.getAddress()+">>");
         }catch (NullPointerException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             ConnectionHelper.log.error(e.getMessage());
         }
     }
