@@ -106,6 +106,7 @@ public class AddComputersDialog {
             String name = nameTextField.getText();
             if(name.trim().length() <= 0) return;
             Computer comp = new Computer(room, "Komputer", name, StatusType.UNKNOWN);
+            comp.setSelected(true);
             comps.add(comp);
             table.getItems().add(comp);
             btnOk.setDisable(false);
@@ -120,6 +121,7 @@ public class AddComputersDialog {
             @Override
             public void handle(ActionEvent event) {
                 Computer comp = new Computer(room, "Komputer", ipTextField.getText(), StatusType.UNKNOWN);
+                comp.setSelected(true);
                 comps.add(comp);
                 table.getItems().add(comp);
                 ipTextField.setText(increaseIPAddress(ipTextField.getText()));
@@ -137,6 +139,7 @@ public class AddComputersDialog {
             long addressStop = convertFromString(ipTextField2.getText());
             for(long i = addressStart; i <= addressStop; i++) {
                 Computer comp = new Computer(room, "Komputer", convertToString(i), StatusType.UNKNOWN);
+                comp.setSelected(true);
                 comps.add(comp);
                 table.getItems().add(comp);
             }
@@ -221,15 +224,15 @@ public class AddComputersDialog {
         grid.add(addressLabel, 0, row);
 
         nameTextField.setPromptText("Wprowadź nazwę DNS skomputera");
-        grid.add(nameTextField, 0, ++row);
+        grid.add(nameTextField, 0, (++row));
         grid.add(btnAddCompyterByName, 1, row);
 
-        grid.add(new Label("Od:"), 0, ++row);
-        grid.add(ipTextField, 0, ++row);
+        grid.add(new Label("Od:"), 0, (++row));
+        grid.add(ipTextField, 0, (++row));
         grid.add(btnAddIPAddress, 1, row);
 
-        grid.add(new Label("Do:"), 0, ++row);
-        grid.add(ipTextField2, 0, ++row);
+        grid.add(new Label("Do:"), 0, (++row));
+        grid.add(ipTextField2, 0, (++row));
         grid.add(btnAddIPAddressRange, 1, row);
 
         selectCol.setMinWidth(50);
@@ -245,23 +248,23 @@ public class AddComputersDialog {
         table.setEditable(true);
 
         table.setTooltip(new Tooltip("Lista komputerów do dodania."+System.lineSeparator()+"Aby usunąć komputer z listy wystarczy usunąć zaznaczenie w pierwszej kolumnie."));
-        selectCol.setCellValueFactory( new PropertyValueFactory<>("selected") );
         addressCol.setCellValueFactory( new PropertyValueFactory<>("address") );
+        selectCol.setCellValueFactory( new PropertyValueFactory<>("selected") );
         selectCol.setCellFactory(
-                new Callback<TableColumn<Computer,Boolean>,TableCell<Computer,Boolean>>(){
-                    @Override public
-                    TableCell<Computer,Boolean> call( TableColumn<Computer,Boolean> p ){
-                        return new CheckBoxTableCell<>();
-                    }
-                });
+            new Callback<TableColumn<Computer,Boolean>,TableCell<Computer,Boolean>>(){
+                @Override public
+                TableCell<Computer,Boolean> call( TableColumn<Computer,Boolean> p ){
+                    return new CheckBoxTableCell<>();
+                }
+            });
 
-        grid.add(new Label("Tabela komputerów do dodania:"), 0, ++row);
-        grid.add(table, 0,++row);
+        grid.add(new Label("Tabela komputerów do dodania:"), 0, (++row));
+        grid.add(table, 0,(++row));
         Button btnClear = new Button("Wyczyść tabelkę");
 
         btnClear.setOnAction(actionEvent -> Platform.runLater(() -> {
-            table.getItems().clear();        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK );
-
+            table.getItems().clear();
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK );
             comps.clear();
         }));
         grid.add(btnClear, 1,row);
@@ -277,14 +280,10 @@ public class AddComputersDialog {
                 new Thread(() -> {
                     try {
                         pingCheck(comps);
-                    } catch (InterruptedException e) {
+                    } catch (InterruptedException | ExecutionException e) {
                         ConnectionHelper.log.error(e.getMessage());
                         throw new RuntimeException(e);
-                    } catch (ExecutionException e) {
-                        ConnectionHelper.log.error(e.getMessage());
-                        throw new RuntimeException(e);
-                    }
-                     finally {
+                    } finally {
                             Platform.runLater(() -> {
                                 btnFilterIPs.setDisable(false);
                                 dialog.getDialogPane().setCursor(Cursor.DEFAULT);
@@ -292,40 +291,18 @@ public class AddComputersDialog {
 
                         }
                 }).start();
-//            for (Computer c : comps) {
-//                if (c.isSelected()) {
-//                    new Thread(() ->
-//                    {
-//                        try {
-//                            final boolean bRet = Ping.ping(c.getAddress());
-//                            Platform.runLater(() -> c.setSelected(bRet));
-//                        } catch (IOException e) {
-//                            ConnectionHelper.log.error(e.getMessage());
-//                            //e.printStackTrace();
-//                            c.setSelected(false);
-//                        }
-//
-//
-//                    }).start();
-//
-//                    btnFilterIPs.setDisable(false);
-//                }
-//            }
         });
 
-
-        grid.add(btnFilterIPs, 0, ++row);
         btnFilterIPs.setTooltip(new Tooltip("Sprawdza komendą PING dostępność komputera i w jej braku wyłacza go z listy dodawanych."));
-        grid.add(summarizeLabel, 0, ++row);
+        grid.add(btnFilterIPs, 0, (++row));
+        grid.add(summarizeLabel, 0, (++row));
 
         btnOk = dialog.getDialogPane().lookupButton(ButtonType.OK);
 
         btnOk.setDisable(true);
-
         dialog.getDialogPane().setContent(grid);
-
         dialog.setResultConverter(buttonType -> {
-            if(buttonType == ButtonType.OK)
+            if (buttonType == ButtonType.OK)
                 return "OK";
             return "FALSE";
         });

@@ -2,19 +2,43 @@
 Narzędzie adminstracyjne pracujące w oparciu o protokół SSH służące do zdalnej synchronizachi poleceń na wielu stacjach roboczych.
 
 ## Kompilacja i uruchomienie
-<p>Polecenie: 
-<i>./mvnw assembly:single</i>
-utworzy plik RemoteAdmin-1.5-jar-with-dependencies.jar ze wszystkimi zależnmi biblitekami (za wyjątkiem JavaFX)
-</p>
-<p>Polecenie: 
-<i>./mvnw package</i>
-utworzy plik RemoteAdmin.jar dużo mniejszy ale bez dowiązań, które bedzie trzeba dodać.
-</p>
 
-Komenda uruchomienia JARa:
-<p>
-<i>java --module-path <b>/snap/openjfx/current/sdk/lib/</b> --add-modules javafx.controls,javafx.base,javafx.fxml -jar RemoteAdmin-1.5-jar-with-dependencies.jar</i>
-</p>
+### Kompilacja:
+<p><i>mvn clean</i></p>
+<p><i>mvn install</i></p>
+
+### Uruchomienie:
+<i>java --module-path ./release  --add-modules javafx.controls,javafx.base,javafx.fxml -jar RemoteAdmin-1.5-jar-with-dependencies.jar </i>
+
+[//]: # (<p>Polecenie: )
+
+[//]: # (<i>./mvnw assembly:single</i>)
+
+[//]: # (utworzy plik RemoteAdmin-1.5-jar-with-dependencies.jar ze wszystkimi zależnmi biblitekami &#40;za wyjątkiem JavaFX&#41;)
+
+[//]: # (</p>)
+
+[//]: # (<p>Polecenie: )
+
+[//]: # (<i>./mvnw package</i>)
+
+[//]: # (utworzy plik RemoteAdmin.jar dużo mniejszy ale bez dowiązań, które bedzie trzeba dodać.)
+
+[//]: # (</p>)
+
+[//]: # (Komenda uruchomienia JARa:)
+
+[//]: # (<p>)
+
+[//]: # (<i>java --module-path <b>/snap/openjfx/current/sdk/lib/</b> --add-modules javafx.controls,javafx.base,javafx.fxml -jar RemoteAdmin-1.5-jar-with-dependencies.jar</i>)
+
+[//]: # (</p>)
+
+## Historia Wersji:
+
+### wersja 1.5.7
+<li>Poprawki w pliku pom.xml dotyczące instalatora</li>
+<li>Bardziej instuicyjne dodawanie komputerów</li>
 
 ### wersja 1.5.6
 <li>Usunięcie blokowania przycisku polecenia ('>>') przy błędzie logowania.</li>

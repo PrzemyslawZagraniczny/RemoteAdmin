@@ -176,7 +176,29 @@
                     </archive>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+<!--                            <excludeArtifactIds>junit</excludeArtifactIds>-->
+<!--                            <excludeArtifactIds>junit-jupiter-api</excludeArtifactIds>-->
+<!--                            <excludeArtifactIds>junit-jupiter-engine</excludeArtifactIds>-->
+<!--                            <excludeArtifactIds>jackson-core</excludeArtifactIds>-->
+<!--                            <excludeArtifactIds>jackson-databind</excludeArtifactIds>-->
+<!--                            <excludeArtifactIds>annotations</excludeArtifactIds>-->
+                            <outputDirectory>target/release/</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
